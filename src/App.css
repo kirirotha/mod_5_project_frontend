@@ -1,26 +1,114 @@
 @import url(https://fonts.googleapis.com/css?family=Roboto:300);
 
+body { 
+  margin:0; 
+  padding:0;
+  }
+
 body,h1 {font-family: "Raleway", sans-serif}
 body, html {height: 100%}
+
+.nav-bar{
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width:100%;
+  z-index: 5;
+}
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.75);
+  width: 100%;
+  height: 100px;
+  z-index: 5;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+
+}
+
+.nav-logo{
+  background-image: url('./images/Projekt-camp-logo-2-white.png');
+  background-size: cover;
+  height: 96px;
+  width: 172px;
+  margin-left: 100px;
+}
+.nav button{
+  font-family: "Roboto", sans-serif;
+  text-transform: uppercase;
+  outline: 0;
+  background: #32CD32;
+  width: 160px;
+  height: 56px;
+  border: 0;
+  padding: 15px;
+  color: #FFFFFF;
+  font-size: 16px;
+  -webkit-transition: all 0.3 ease;
+  transition: all 0.3 ease;
+  cursor: pointer;
+  margin-right: 100px;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+}
+
+
+.nav button:hover,.form button:active,.form button:focus {
+  background: #009600;
+}
+
+.nav button:disabled{
+  background: grey;
+}
+
+.button-bar{
+  display: flex;
+}
+
+
+
+.login-page { 
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background-size: cover;
+  background-image: url('./images/camp-background1.jpg');
+  background-position: center;
+  background-repeat:no-repeat;  
+  z-index: 0;
+}
+
 
 
 .form {
   position: relative;
   z-index: 6;
-  background: #FFFFFF;
+  background-color: rgba(0, 0, 0, 0.55);
   max-width: 360px;
-  margin: 200px auto 0px;
-  padding: 45px;
+  margin: 160px auto 0px;
+  padding-bottom: 45px;
   text-align: center;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
 }
+.form-title {
+  background-color: rgba(0, 0, 0, 0.75);
+  padding-top: 15px;
+  padding-bottom: 20px;
+  height: 70px;
+  width: 360px;
+  top: 0px;
+  margin-bottom: 50px;
+  color: #FFFFFF;
+}
+
 .form input {
   font-family: "Roboto", sans-serif;
   outline: 0;
   background: #f2f2f2;
-  width: 100%;
+  width: 80%;
   border: 0;
-  margin: 0 0 15px;
+  margin: 0 0 25px;
   padding: 15px;
   box-sizing: border-box;
   font-size: 14px;
@@ -29,18 +117,20 @@ body, html {height: 100%}
   font-family: "Roboto", sans-serif;
   text-transform: uppercase;
   outline: 0;
-  background: #00b3b3;
-  width: 100%;
+  background: #32CD32;
+  width: 80%;
   border: 0;
   padding: 15px;
   color: #FFFFFF;
-  font-size: 14px;
+  font-size: 16px;
   -webkit-transition: all 0.3 ease;
   transition: all 0.3 ease;
   cursor: pointer;
+  margin-top: 25px;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
 }
 .form button:hover,.form button:active,.form button:focus {
-  background: #006767;
+  background: #009600;
 }
 .form .message {
   margin: 15px 0 0;
@@ -48,9 +138,90 @@ body, html {height: 100%}
   font-size: 12px;
 }
 .form .message a {
-  color: #00b3b3;
+  color: #32CD32;
   text-decoration: none;
 }
 .form .register-form {
   display: none;
+}
+
+
+.map-conatiner{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0px;
+  left: 0px
+}
+
+.mapboxgl-map {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  height: 968px;
+  border: none!important;
+}
+.mapboxgl-canvas {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  border: none!important;
+}
+
+.marker {
+  background-image: url('./images/camping-tent-icon-4.png');
+  background-size: cover;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.dropdown-content{
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  z-index: 10!important;
+}
+
+.dropdown-button{
+  background-color: white!important;
+  color: #009600!important;
+}
+
+.dropdown-button:hover, .dropdown-button:active, .dropdown-button:focus {
+  background: #009600!important;
+  color: white!important;
+}
+
+.dropdown-button:disabled{
+  background: grey!important;
+  color: white!important;
+}
+
+.trip-panel {
+  position: absolute;
+  z-index: 4;
+  top: 0px;
+  right: 0px;
+  background-color: rgba(0, 0, 0, 0.55);
+  max-width: 500px;
+  height: 70%;
+  margin: 140px 60px;
+  padding-bottom: 45px;
+  text-align: center;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+}
+.trip-panel-title {
+  background-color: rgba(0, 0, 0, 0.75);
+  padding-top: 15px;
+  padding-bottom: 20px;
+  height: 70px;
+  width: 500px;
+  top: 0px;
+  margin-bottom: 50px;
+  color: #FFFFFF;
 }

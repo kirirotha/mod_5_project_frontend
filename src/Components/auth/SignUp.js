@@ -58,13 +58,17 @@ class SignUp extends React.Component {
     return (
         <div>
             <div className="login-page">
+                <div className='nav'>
+                    <div className='nav-logo'/>
+                    <div></div>
+                </div>
                 <div className="form">
+                    <div className="form-title"><h1 style={{fontWeight:'bold'}}>Sign Up</h1></div>
                     <form className="login-form"onSubmit={this.handleSubmit}>
-                        <h2> Create Account </h2>
                         <input type="text" onChange={this.handleInputChange} name='username' placeholder="Username"  />
                         <input type="password" onChange={this.handleInputChange} name='password' placeholder="Password"/>
                         <input type="password" onChange={this.handleInputChange} name='password-verify' placeholder="Verify Password"/>
-                        <button id="submit" type="submit" value="Submit">create account </button>
+                        <button id="submit" type="submit" value="Submit">Sign Up</button>
                         <p className="message">Already have an account? <Link to='/login'>Click Here</Link></p>
                     </form>
                 </div>
