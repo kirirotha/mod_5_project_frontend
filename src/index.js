@@ -5,6 +5,8 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
+// import 'react-map-gl-geocoder/dist/mapbox-gl-geocoder.css'
+
 // import 'bootstrap/dist/css/bootstrap.min.css';
 
 

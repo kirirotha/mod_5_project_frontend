@@ -7,6 +7,9 @@ body {
 
 body,h1 {font-family: "Raleway", sans-serif}
 body, html {height: 100%}
+a{
+  color: #009600;
+}
 
 ::-webkit-scrollbar {
   width: 16px;
@@ -184,7 +187,7 @@ body, html {height: 100%}
 }
 
 
-.map-conatiner{
+.map-container{
   position: absolute;
   width: 100%;
   height: 100%;
@@ -201,6 +204,28 @@ body, html {height: 100%}
   border: none!important;
 }
 
+.map-search{
+  position: absolute;
+  width: 200px;
+  height: 70px;
+  top: 128px;
+  left: 40px;
+  z-index: 5;
+}
+
+.search-icon {
+  background-image: url('./images/magnifying-glass-icon.png');
+  background-size: cover;
+  opacity: 0.8;
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  margin-left: 8px;
+  margin-top: 10px;
+  top: 0px;
+  left: 0px;
+  z-index: 3
+}
 
 .mapboxgl-map {
   position: absolute;
@@ -286,7 +311,7 @@ body, html {height: 100%}
   color: #FFFFFF;
   padding: 16px;
   margin: 16px;
-  height: 50%;
+  height: 60%;
   overflow-y: scroll;
   text-align: left;
 }
@@ -306,3 +331,207 @@ body, html {height: 100%}
 .info-line h3 {
   margin-right: 10px;
 }
+
+
+.react-geocoder,
+.react-geocoder *,
+.react-geocoder *:after,
+.react-geocoder *:before {
+  box-sizing: border-box;
+}
+
+.react-geocoder {
+  font-size: 30px;
+  line-height: 24px;
+  font-family: "Open Sans", "Helvetica Neue", Arial, Helvetica, sans-serif;
+  position: relative;
+  background-color: #fff;
+  width: 100%;
+  min-width: 400px;
+  z-index: 1;
+  border-radius: 4px;
+  transition: width .25s, min-width .25s;
+}
+
+.react-geocoder input {
+  font: inherit;
+  font-size: 22px;
+  width: 100%;
+  border: 0;
+  background-color: transparent;
+  margin: 0;
+  height: 50px;
+  color: #404040; /* fallback */
+  color: rgba(0, 0, 0, 0.75);
+  padding: 6px 45px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.react-geocoder input::-ms-clear {
+  display: none; /* hide input clear button in IE */
+}
+
+.react-geocoder input:focus {
+  color: #404040; /* fallback */
+  color: rgba(0, 0, 0, 0.75);
+  outline: 0;
+  box-shadow: none;
+  outline: thin dotted\8;
+}
+
+.react-geocoder .react-geocoder pin-right > * {
+  z-index: 2;
+  position: absolute;
+  right: 8px;
+  top: 7px;
+  display: none;
+}
+
+.react-geocoder,
+.react-geocoder-results {
+  box-shadow: 0 0 10px 2px rgba(0,0,0,.1);
+}
+
+/* Collapsed */
+.react-geocoder.react-geocoder collapsed {
+  width: 50px;
+  min-width: 50px;
+  transition: width .25s, min-width .25s;
+}
+
+/* Suggestions */
+.react-geocoder-results {
+  background-color: rgba(255, 255, 255, 0.4);;
+  border-radius: 4px;
+  left: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  width: 100%;
+  top: 110%; /* fallback */
+  top: calc(100% + 6px);
+  z-index: 1000;
+  overflow: hidden;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.mapboxgl-ctrl-bottom-left-results,
+.mapboxgl-ctrl-bottom-right-results {
+  top: auto;
+  bottom: 100%;
+}
+
+.react-geocoder-results > li > a {
+  cursor: default;
+  display: block;
+  padding: 6px 12px;
+  color: #404040!important;
+  cursor: pointer;
+
+}
+
+.react-geocoder-results > .active > a,
+.react-geocoder-results > li > a:hover {
+  color: #404040;
+  background-color: grey;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.react-geocoder-results-title {
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.react-geocoder-results-title,
+.react-geocoder-results-address {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.react-geocoder-item {
+  background-color: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.3), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+}
+
+.react-geocoder-item:hover{
+  background-color: rgba(0, 0, 0, 0.9);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Icons */
+.react-geocoder-icon {
+  display: inline-block;
+  vertical-align: middle;
+  speak: none;
+  fill: #757575;
+  top: 15px;
+}
+
+.react-geocoder-icon-search {
+  position: absolute;
+  top: 13px;
+  left: 12px;
+  width: 23px;
+  height: 23px;
+}
+
+.react-geocoder-button {
+  padding: 0;
+  margin: 0;
+  border: none;
+  cursor: pointer;
+  background: #fff;
+  line-height: 1;
+}
+
+.react-geocoder-icon-close {
+  width: 20px;
+  height: 20px;
+  margin-top: 8px;
+  margin-right: 3px;
+}
+
+.react-geocoder button:hover .react-geocoder icon-close {
+  fill: #909090;
+}
+
+.react-geocoder icon-loading {
+  width: 26px;
+  height: 26px;
+  margin-top: 5px;
+  margin-right: 0px;
+  -moz-animation: rotate 0.8s infinite cubic-bezier(0.45, 0.05, 0.55, 0.95);
+  -webkit-animation: rotate 0.8s infinite cubic-bezier(0.45, 0.05, 0.55, 0.95);
+  animation: rotate 0.8s infinite cubic-bezier(0.45, 0.05, 0.55, 0.95);
+}
+
+/* Animation */
+@-webkit-keyframes rotate {
+  from {
+    -webkit-transform: rotate(0);
+    transform: rotate(0);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rotate {
+  from {
+    -webkit-transform: rotate(0);
+    transform: rotate(0);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+

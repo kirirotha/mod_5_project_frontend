@@ -2,7 +2,7 @@ import React from 'react';
 import { withRouter } from 'react-router';
 
 import Geocoder from 'react-mapbox-gl-geocoder';
-import ReactMapGL, { Marker, Popup } from 'react-map-gl';
+import MapGL, { Marker, Popup } from 'react-map-gl';
 
 
 // import { Link } from 'react-router-dom';
@@ -20,7 +20,7 @@ const mapStyle = {
     height: '968px'
 }
 const params = {
-    country: "tx"
+    country: "us"
 }
 
 
@@ -44,7 +44,6 @@ const dummySite = {
                 "reservationURL": "",
                 "longitude": -77.034084142948,
                 "latitude": 38.909671288923
-
             }
         }
     ]
@@ -78,9 +77,8 @@ class Map extends React.Component {
 
 
     componentDidMount(){
-        setInterval(() => this.fetchCampsites(),5000)
+        this.fetchCampsites()
     }
-    
 
     clearMarkers(){
         markers.forEach((marker) => marker.remove());
@@ -193,16 +191,29 @@ class Map extends React.Component {
         this.setState({...this.state, viewport: viewport})
     }
 
+    handleMapClick = () =>{
+        this.fetchCampsites()
+    }
+
     onSelected = (viewport, item) => {
         this.setState({
             ...this.state,
-            viewport: viewport,
+            viewport: {
+                latitude: viewport.latitude,
+                longitude: viewport.longitude,
+                zoom: 9.25
+            },
             tempMarker: {
                 name: item.place_name,
                 longitude: item.center[0],
                 latitude: item.center[1]
               }
-        })
+        },
+        () => {
+            this.closeDetailWindow()
+            setTimeout(this.fetchCampsites(), 1000)
+        }
+        )
     }
 
     renderMarkers = () =>{
@@ -226,26 +237,46 @@ class Map extends React.Component {
           })
     }
 
+    renderPopup = () =>{
+        if(this.state.showPopup && this.state.popupLon && this.state.popupLat){
+            return(
+                <Popup
+                    longitude={this.state.popupLon}
+                    latitude={this.state.popupLat}
+                    closeButton={false}
+                    closeOnClick={false}
+                    anchor='bottom-left'
+                    offsetLeft={16}
+                    offsetTop={12}
+                >
+                <h3>{this.state.popupName}</h3>
+                </Popup>
+            )
+            }else{
+                return null
+            }
+    }
+
     render(){
         let viewport = this.state.viewport;
         return (
-            <div id="map-container">
+            <div id="map-container" onClick={() => this.handleMapClick()}>
                 <div className="nav-bar">
                     <Navbar handleLogOut={this.props.handleLogOut} changeMode={this.changeMode} mode={this.state.mode}/>
                 </div>
-                {/* <div className='map' id='map'onMouseUp={() => this.fetchCampsites()}> */}
-                    
-                {/* </div> */}
-
-                <Geocoder
-                    mapboxApiAccessToken={ACCESS_TOKEN}
-                    onSelected={this.onSelected}
-                    viewport={viewport}
-                    hideOnSelect={true}
-                    value=""
-                    queryParams={params}
-                />
-                <ReactMapGL
+                <div className="map-search" >
+                    <div className="search-icon"></div>
+                    <Geocoder
+                        mapboxApiAccessToken={ACCESS_TOKEN}
+                        onSelected={this.onSelected}
+                        hideOnSelect={true}
+                        value=""
+                        queryParams={params}
+                        zoom={9.25}
+                    />
+                    </div>
+                <div className="map-container">
+                <MapGL
                     mapboxApiAccessToken={ACCESS_TOKEN}
                     mapStyle="mapbox://styles/mapbox/streets-v11"
                     {...viewport}
@@ -253,24 +284,9 @@ class Map extends React.Component {
                     onViewportChange={(viewport) => this.setState({...this.state, viewport: viewport})}
                 >
                     {this.renderMarkers()}
-                    {this.state.showPopup && this.state.popupLon && this.state.popupLat ? 
-                        <Popup
-                            longitude={this.state.popupLon}
-                            latitude={this.state.popupLat}
-                            closeButton={false}
-                            closeOnClick={false}
-                            anchor='bottom-left'
-                            offsetLeft={16}
-                            offsetTop={12}
-
-                         >
-                          <h3>{this.state.popupName}</h3>
-                        </Popup>
-                    :
-                        null
-                    }
-                </ReactMapGL>
-                {/* {this.renderCampsites()} */}
+                    {this.renderPopup()}
+                </MapGL>
+                </div>
                 <div>{this.state.mode === 'browse' ? <BrowseTrips/> : null}</div>
                 <div>{this.state.mode === 'myTrips' ? <MyTrips/> : null}</div>
                 <div>{this.state.mode === 'createNew' ? <CreateTrip/> : null}</div>
