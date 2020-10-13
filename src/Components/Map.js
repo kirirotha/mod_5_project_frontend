@@ -11,6 +11,9 @@ import BrowseTrips from './BrowseTrips';
 import MyTrips from './MyTrips';
 import CreateTrip from './CreateTrip';
 import CampgroundDetails from './CampgroundDetails';
+import TripEditor from './TripEditor';
+
+
 
 const API_KEY = '9f0eb16d-c443-452d-aa8c-be4b8259d21f'
 const ACCESS_TOKEN = 'pk.eyJ1Ijoia2lyaXJvdGhhIiwiYSI6ImNrZnljd3RwZTFscXYyc3M5M21hYnBzd3cifQ.QtkZoBqO03yMwmf8kyL0Ww'
@@ -290,6 +293,7 @@ class Map extends React.Component {
                 <div>{this.state.mode === 'browse' ? <BrowseTrips/> : null}</div>
                 <div>{this.state.mode === 'myTrips' ? <MyTrips/> : null}</div>
                 <div>{this.state.mode === 'createNew' ? <CreateTrip/> : null}</div>
+                <div>{this.state.mode === 'tripEditor' ? <TripEditor/> : null}</div>
                 <div>{this.state.showDetail === true ? <CampgroundDetails selectedCampground={this.state.selectedCampground} closeDetailWindow={this.closeDetailWindow}/> : null}</div>
             </div>  
         )

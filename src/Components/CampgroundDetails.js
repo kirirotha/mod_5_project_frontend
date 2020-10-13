@@ -12,9 +12,9 @@ class CampgroundDetails extends React.Component{
 
     render(){
         return(
-            <div className="trip-panel">
+            <div className="detail-panel">
                 <div className="close-button" onClick={this.handleCloseClick}>x</div>
-                <div className="trip-panel-title"> 
+                <div className="detail-panel-title"> 
                     <h1>{this.props.selectedCampground.properties.name}</h1> 
                 </div>
                 <div className="campground-details" dangerouslySetInnerHTML={this.renderDetails()}></div>

@@ -21,6 +21,7 @@ a{
 
 ::-webkit-scrollbar-thumb {
   background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -287,17 +288,43 @@ a{
 .trip-panel {
   position: absolute;
   z-index: 4;
-  top: 0px;
-  right: 0px;
+  top: 228px;
+  left: 40px;
   background-color: rgba(0, 0, 0, 0.55);
-  max-width: 500px;
-  height: 70%;
-  margin: 140px 60px;
+  max-width: 400px;
+  height: 60%;
   padding-bottom: 48px;
   text-align: center;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
 }
 .trip-panel-title {
+  background-color: rgba(0, 0, 0, 0.75);
+  padding-top: 8px;
+  padding-bottom: 8px;
+  width: 400px;
+  top: 0px;
+  color: #FFFFFF;
+}
+
+.trip-panel-title h1 {
+  font-size: 24px;
+}
+
+.detail-panel {
+  position: absolute;
+  z-index: 4;
+  top: 0px;
+  right: 0px;
+  background-color: rgba(0, 0, 0, 0.55);
+  max-width: 500px;
+  height: 70%;
+  margin: 140px 40px;
+  padding-bottom: 48px;
+  text-align: center;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+}
+
+.detail-panel-title {
   background-color: rgba(0, 0, 0, 0.75);
   padding-top: 16px;
   padding-bottom: 16px;
@@ -315,6 +342,7 @@ a{
   overflow-y: scroll;
   text-align: left;
 }
+
 .campground-info {
   color: #FFFFFF;
   margin: 16px;
@@ -469,7 +497,6 @@ a{
 .react-geocoder-icon {
   display: inline-block;
   vertical-align: middle;
-  speak: none;
   fill: #757575;
   top: 15px;
 }
