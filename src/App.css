@@ -16,7 +16,7 @@ a{
 }
 
 ::-webkit-scrollbar-track {
-  background-color: rgba(0, 0, 0, 0.20);
+  /* background-color: rgba(0, 0, 0, 0.20); */
 }
 
 ::-webkit-scrollbar-thumb {
@@ -48,6 +48,27 @@ a{
 
 .close-button:hover{
   background-color: rgba(255, 255, 255, 0.6);
+}
+
+.delete-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  font-weight: bold;
+  margin-right: 10px;
+  margin-top: 5px;
+  right: 10px;
+  width: 14px;
+  height: 12px;
+  border-radius: 1px;
+  color: rgba(252, 2, 2, 0.9);
+  z-index: 6;
+  cursor: pointer;
+}
+
+.delete-button:hover{
+  font-size: 30px;
 }
 
 .nav-bar{
@@ -313,13 +334,12 @@ a{
 .detail-panel {
   position: absolute;
   z-index: 4;
-  top: 0px;
-  right: 0px;
+  top: 140px;
+  right: 40px;
   background-color: rgba(0, 0, 0, 0.55);
   max-width: 500px;
-  height: 70%;
-  margin: 140px 40px;
-  padding-bottom: 48px;
+  height: 75%;
+  padding-bottom: 0px;
   text-align: center;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
 }
@@ -338,7 +358,7 @@ a{
   color: #FFFFFF;
   padding: 16px;
   margin: 16px;
-  height: 60%;
+  height: 48%;
   overflow-y: scroll;
   text-align: left;
 }
@@ -346,7 +366,7 @@ a{
 .campground-info {
   color: #FFFFFF;
   margin: 16px;
-  height: 30%;
+  height: 15%;
 }
 
 .info-line {
@@ -367,13 +387,17 @@ a{
 
 .trip-list{
   color: #FFFFFF;
-  height: 95%;
+  background-color: rgba(0, 0, 0, 0.2);
+  height: 64%;
+  /* margin-left: 16px; */
+  margin-bottom: 20px;
   overflow-y: scroll;
   text-align: left;
 }
 
 .trip{
   background-color: rgba(255, 255, 255, 0.90);
+  padding-left: 5px;
   color: black;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
 }
@@ -384,6 +408,124 @@ a{
   cursor: pointer;
 }
 
+.trip-details {
+  background-color: rgba(0, 0, 0, 0.40);
+  color: #FFFFFF;
+  margin: 16px;
+  height: 80%;
+  overflow-y: scroll;
+  text-align: left;
+}
+
+.trip-contol-panel{
+  background-color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: space-around;
+  align-content: center;
+}
+
+.trip-control-panel button{
+  font-family: "Roboto", sans-serif;
+  text-transform: uppercase;
+  outline: 0;
+  background: #32CD32;
+  width: 40%;
+  border: 0;
+  padding: 15px;
+  color: #FFFFFF;
+  font-size: 16px;
+  -webkit-transition: all 0.3 ease;
+  transition: all 0.3 ease;
+  cursor: pointer;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+}
+
+.trip-control-panel button:hover,.form button:active,.form button:focus {
+  background: #009600;
+}
+
+.visit{
+  background-color: rgba(255, 255, 255, 0.90);
+  padding-left: 5px;
+  color: black;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+}
+
+.visit:hover{
+  background-color: rgba(0, 0, 0, 0.45);
+  color: #FFFFFF;
+  cursor: pointer;
+}
+
+.trip-form input {
+  font-family: "Roboto", sans-serif;
+  outline: 0;
+  background: #f2f2f2;
+  width: 80%;
+  border: 0;
+  margin: 0 0 25px;
+  padding: 15px;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+.trip-form textarea {
+  font-family: "Roboto", sans-serif;
+  outline: 0;
+  background: #f2f2f2;
+  width: 80%;
+  height: 200px;
+  border: 0;
+  margin: 0 0 25px;
+  padding: 15px;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+.trip-form button {
+  font-family: "Roboto", sans-serif;
+  text-transform: uppercase;
+  outline: 0;
+  background: #32CD32;
+  width: 80%;
+  border: 0;
+  padding: 15px;
+  color: #FFFFFF;
+  font-size: 16px;
+  -webkit-transition: all 0.3 ease;
+  transition: all 0.3 ease;
+  cursor: pointer;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+}
+.trip-form button:hover,.form button:active,.form button:focus {
+  background: #009600;
+}
+
+.trip-form .message {
+  margin-top: -8px;
+  color: #b3b3b3;
+  font-size: 16px;
+}
+
+.toggle-view button {
+  font-family: "Roboto", sans-serif;
+  text-transform: uppercase;
+  outline: 0;
+  background: #32CD32;
+  width: 80%;
+  border: 0;
+  padding: 15px;
+  color: #FFFFFF;
+  font-size: 16px;
+  -webkit-transition: all 0.3 ease;
+  transition: all 0.3 ease;
+  cursor: pointer;
+  margin-top: 25px;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+}
+.toggle-view button:hover,.form button:active,.form button:focus {
+  background: #009600;
+}
 
 
 .react-geocoder,

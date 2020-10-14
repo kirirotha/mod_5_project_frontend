@@ -80,8 +80,10 @@ class Map extends React.Component {
             thisTrip: {},
             myVisits: [],
             publicVisits: [],
-            tripSelected: false
-
+            selectedTrip: null,
+            tripSelected: false,
+            selectedTripCampgrounds: [],
+            showOnlyTrip: true
         }
       }
 
@@ -224,6 +226,14 @@ class Map extends React.Component {
         })
     }
 
+    closeTripDetailWindow = () =>{
+        this.setState({
+            ...this.state,
+            tripSelected: false,
+            selectedTripCampgrounds: []
+        })
+    }
+
     handleLogoutClick = () =>{
         this.props.handleLogOut()
     }
@@ -231,6 +241,7 @@ class Map extends React.Component {
     changeMode = (newMode) =>{
         this.setState({
             ...this.state,
+            tripSelected: false,
             mode: newMode
         })
     }
@@ -270,7 +281,7 @@ class Map extends React.Component {
     }
 
     handleMapClick = () =>{
-        if(this.state.mode === "explore"){
+        if(this.state.mode === "explore" || this.state.showOnlyTrip === false){
             this.fetchCampsites()
         }
     }
@@ -297,7 +308,13 @@ class Map extends React.Component {
     }
 
     renderMarkers = () =>{
-        return this.state.campgrounds.features.map((campground, index) => {
+        let campgroundList
+        if(this.state.showOnlyTrip === true && (this.state.mode === "browse" || this.state.mode === "myTrips")){
+            campgroundList = this.state.selectedTripCampgrounds
+        }else{
+            campgroundList = this.state.campgrounds.features
+        }
+        return campgroundList.map((campground, index) => {
             return(
                 <Marker
                 key={index}
@@ -338,14 +355,19 @@ class Map extends React.Component {
     }
 
     handleMyTripClick = (trip) =>{
-        this.getMyTripVisits(trip)
-
+        this.setState({
+            ...this.state,
+            selectedTrip: trip
+        },
+           () => this.getMyTripVisits(trip)
+        )
     }
 
     getMyTripVisits = (trip) =>{
-        let campgrounds = this.state.myVisits.map(campground =>{
+        let campgrounds = []
+        this.state.myVisits.forEach(campground =>{
             if(campground.trip.id === trip.id){
-                return(
+                campgrounds.push(
                         {
                             "type": "Feature",
                             "geometry": {
@@ -356,6 +378,7 @@ class Map extends React.Component {
                             ]
                             },
                             "properties": {
+                                "id": campground.id,
                                 "name": campground.location_name,
                                 "description": campground.description,
                                 "phone": campground.phone,
@@ -371,10 +394,36 @@ class Map extends React.Component {
         this.setState({
             ...this.state,
             tripSelected: true,
-            campgrounds:{
-                ...this.state.campgrounds,
-                features: campgrounds
+            selectedTripCampgrounds: campgrounds
+        })
+    }
+
+    toggleCampsites = () =>{
+        this.setState({
+            ...this.state,
+            showOnlyTrip: !this.state.showOnlyTrip
+        })
+    }
+
+    addCampsiteToTrip = () =>{
+        let selectedTripCampgrounds = this.state.selectedTripCampgrounds
+        selectedTripCampgrounds.push(this.state.selectedCampground)
+        this.setState({
+            ...this.state,
+            selectedTripCampgrounds: selectedTripCampgrounds
+        })
+    }
+
+    deleteCampsiteFromTrip = (campgroundToRemove) => {
+        let selectedTripCampgrounds = this.state.selectedTripCampgrounds.filter(campground =>{
+            if(campground.properties.id !== campgroundToRemove.properties.id){
+                return campground
             }
+        })
+        console.log(selectedTripCampgrounds)
+        this.setState({
+            ...this.state,
+            selectedTripCampgrounds: selectedTripCampgrounds
         })
     }
 
@@ -385,7 +434,7 @@ class Map extends React.Component {
                 <div className="nav-bar">
                     <Navbar handleLogOut={this.props.handleLogOut} changeMode={this.changeMode} mode={this.state.mode}/>
                 </div>
-                <div className="map-search" >
+                {/* <div className="map-search" >
                     <div className="search-icon"></div>
                     <Geocoder
                         mapboxApiAccessToken={ACCESS_TOKEN}
@@ -407,12 +456,22 @@ class Map extends React.Component {
                         {this.renderMarkers()}
                         {this.renderPopup()}
                     </MapGL>
-                </div>
+                </div> */}
                 <div>{this.state.mode === 'browse' ? <BrowseTrips/> : null}</div>
-                <div>{this.state.mode === 'myTrips' ? <MyTrips myTrips={this.state.myTrips} 
+                <div>{this.state.mode === 'myTrips' && this.state.tripSelected === false ? <MyTrips myTrips={this.state.myTrips} 
                                                                 handleMyTripClick={this.handleMyTripClick}/> : null}</div>
-                <div>{this.state.mode === 'createNew' ? <CreateTrip/> : null}</div>
-                <div>{this.state.mode === 'tripEditor' ? <TripEditor/> : null}</div>
+                <div>{this.state.mode === 'createNew' ? <CreateTrip submitNewTrip={this.submitNewTrip}/> : null}</div>
+                <div>{this.state.tripSelected === true && (this.state.mode === 'myTrips' || this.state.mode === 'browse') ? <TripEditor selectedTripCampgrounds={this.state.selectedTripCampgrounds}
+                                                                    trip={this.state.selectedTrip} 
+                                                                    closeTripDetailWindow={this.closeTripDetailWindow}
+                                                                    handleCampgroundClick={this.handleCampgroundClick}
+                                                                    handleOnMouseEnter = {this.handleOnMouseEnter}
+                                                                    handleOnMouseLeave = {this.handleOnMouseLeave}
+                                                                    showOnlyTrip = {this.state.showOnlyTrip}
+                                                                    toggleCampsites = {this.toggleCampsites}
+                                                                    addCampsiteToTrip = {this.addCampsiteToTrip}
+                                                                    deleteCampsiteFromTrip = {this.deleteCampsiteFromTrip}
+                                                                    /> : null}</div>
                 <div>{this.state.showDetail === true ? <CampgroundDetails selectedCampground={this.state.selectedCampground} closeDetailWindow={this.closeDetailWindow}/> : null}</div>
             </div>  
         )
