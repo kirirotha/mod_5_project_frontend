@@ -128,7 +128,7 @@ a{
   z-index: 6;
   background-color: rgba(0, 0, 0, 0.55);
   max-width: 360px;
-  margin: 160px auto 0px;
+  margin: 112px auto 0px;
   padding-bottom: 45px;
   text-align: center;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
@@ -354,11 +354,36 @@ a{
   height: 15px;
   display: flex;
   align-items: center;
+  color: #FFFFFF;
 }
 
 .info-line h3 {
   margin-right: 10px;
 }
+
+.info-line p {
+  margin-right: 10px;
+}
+
+.trip-list{
+  color: #FFFFFF;
+  height: 95%;
+  overflow-y: scroll;
+  text-align: left;
+}
+
+.trip{
+  background-color: rgba(255, 255, 255, 0.90);
+  color: black;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+}
+
+.trip:hover{
+  background-color: rgba(0, 0, 0, 0.45);
+  color: #FFFFFF;
+  cursor: pointer;
+}
+
 
 
 .react-geocoder,

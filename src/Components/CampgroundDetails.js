@@ -16,9 +16,17 @@ class CampgroundDetails extends React.Component{
                 <div className="close-button" onClick={this.handleCloseClick}>x</div>
                 <div className="detail-panel-title"> 
                     <h1>{this.props.selectedCampground.properties.name}</h1> 
+                    <div className="info-line" style={{display:'flex', justifyContent: 'space-evenly'}}>
+                        <h3>Latitude:</h3>
+                        <p>{this.props.selectedCampground.properties.latitude}</p>
+                        <h3>Longitude:</h3>
+                        <p>{this.props.selectedCampground.properties.longitude}</p>
+                    </div>
                 </div>
+                
                 <div className="campground-details" dangerouslySetInnerHTML={this.renderDetails()}></div>
                 <div className="campground-info">
+                    
                     <div className="info-line">
                         <h3>Phone:</h3>
                         <p>{this.props.selectedCampground.properties.phone ? this.props.selectedCampground.properties.phone : null}</p>

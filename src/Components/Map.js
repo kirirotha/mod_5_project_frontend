@@ -74,19 +74,94 @@ class Map extends React.Component {
             popupLon: null,
             popupName: "",
             selectedCampground: "",
-            campgroundIndex: null
+            campgroundIndex: null,
+            myTrips: [],
+            publicTrips: [],
+            thisTrip: {},
+            myVisits: [],
+            publicVisits: [],
+            tripSelected: false
+
         }
       }
 
 
     componentDidMount(){
         this.fetchCampsites()
+        this.fetchTrips()
+        this.fetchVisits()
     }
 
-    clearMarkers(){
+    clearMarkers= () => {
         markers.forEach((marker) => marker.remove());
         markers = [];
-      }
+    }
+
+    fetchTrips = () =>{
+        fetch("http://localhost:3001/trips")
+        .then(res => res.json())
+        .then(trips =>{
+            this.getMyTrips(trips)
+            this.getPublicTrips(trips)
+        })
+    }
+
+    getMyTrips = (trips) =>{
+        const myTrips = trips.filter(trip =>{
+            if(trip.user.id === Number(localStorage.user_id)){
+                return trip
+            }
+        })
+        this.setState({
+            ...this.state,
+            myTrips: myTrips
+        })
+    }
+
+    getPublicTrips = (trips) =>{
+        const publicTrips = trips.filter(trip =>{
+            if(trip.is_public === true){
+                return trip
+            }
+        })
+        this.setState({
+            ...this.state,
+            publicTrips: publicTrips
+        })
+    }
+
+    fetchVisits = () => {
+        fetch("http://localhost:3001/visits")
+        .then(res => res.json())
+        .then(visits =>{
+            this.getMyVisits(visits)
+            this.getPublicVisits(visits)
+        })
+    }
+
+    getMyVisits = (visits) =>{
+        const myVisits = visits.filter(visit =>{
+            if(visit.trip.user_id === Number(localStorage.user_id)){
+                return visit
+            }
+        })
+        this.setState({
+            ...this.state,
+            myVisits: myVisits
+        })
+    }
+
+    getPublicVisits = (visits) =>{
+        const publicVisits = visits.filter(visit =>{
+            if(visit.trip.is_public === true){
+                return visit
+            }
+        })
+        this.setState({
+            ...this.state,
+            publicVisits: publicVisits
+        })
+    }
 
     fetchCampsites = () =>{
         // const proxyurl = "https://cors-anywhere.herokuapp.com/";
@@ -195,7 +270,9 @@ class Map extends React.Component {
     }
 
     handleMapClick = () =>{
-        this.fetchCampsites()
+        if(this.state.mode === "explore"){
+            this.fetchCampsites()
+        }
     }
 
     onSelected = (viewport, item) => {
@@ -260,6 +337,47 @@ class Map extends React.Component {
             }
     }
 
+    handleMyTripClick = (trip) =>{
+        this.getMyTripVisits(trip)
+
+    }
+
+    getMyTripVisits = (trip) =>{
+        let campgrounds = this.state.myVisits.map(campground =>{
+            if(campground.trip.id === trip.id){
+                return(
+                        {
+                            "type": "Feature",
+                            "geometry": {
+                            "type": "Point",
+                            "coordinates": [
+                                Number(campground.longitude),
+                                Number(campground.latitude)
+                            ]
+                            },
+                            "properties": {
+                                "name": campground.location_name,
+                                "description": campground.description,
+                                "phone": campground.phone,
+                                "reservable": campground.reservable,
+                                "email": campground.email,
+                                "longitude": Number(campground.longitude),
+                                "latitude": Number(campground.latitude)
+                            }
+                        }
+                )
+            }
+        })
+        this.setState({
+            ...this.state,
+            tripSelected: true,
+            campgrounds:{
+                ...this.state.campgrounds,
+                features: campgrounds
+            }
+        })
+    }
+
     render(){
         let viewport = this.state.viewport;
         return (
@@ -277,21 +395,22 @@ class Map extends React.Component {
                         queryParams={params}
                         zoom={9.25}
                     />
-                    </div>
+                </div>
                 <div className="map-container">
-                <MapGL
-                    mapboxApiAccessToken={ACCESS_TOKEN}
-                    mapStyle="mapbox://styles/mapbox/streets-v11"
-                    {...viewport}
-                    {...mapStyle}
-                    onViewportChange={(viewport) => this.setState({...this.state, viewport: viewport})}
-                >
-                    {this.renderMarkers()}
-                    {this.renderPopup()}
-                </MapGL>
+                    <MapGL
+                        mapboxApiAccessToken={ACCESS_TOKEN}
+                        mapStyle="mapbox://styles/mapbox/streets-v11"
+                        {...viewport}
+                        {...mapStyle}
+                        onViewportChange={(viewport) => this.setState({...this.state, viewport: viewport})}
+                    >
+                        {this.renderMarkers()}
+                        {this.renderPopup()}
+                    </MapGL>
                 </div>
                 <div>{this.state.mode === 'browse' ? <BrowseTrips/> : null}</div>
-                <div>{this.state.mode === 'myTrips' ? <MyTrips/> : null}</div>
+                <div>{this.state.mode === 'myTrips' ? <MyTrips myTrips={this.state.myTrips} 
+                                                                handleMyTripClick={this.handleMyTripClick}/> : null}</div>
                 <div>{this.state.mode === 'createNew' ? <CreateTrip/> : null}</div>
                 <div>{this.state.mode === 'tripEditor' ? <TripEditor/> : null}</div>
                 <div>{this.state.showDetail === true ? <CampgroundDetails selectedCampground={this.state.selectedCampground} closeDetailWindow={this.closeDetailWindow}/> : null}</div>

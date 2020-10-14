@@ -37,6 +37,7 @@ class Login extends React.Component {
             // console.log(token.user_id)
             localStorage.setItem('auth_key',token['auth_key'])
             localStorage.setItem('username',this.state.username)
+            localStorage.setItem('user_id', token['user_id'])
             this.props.handleLogIn(this.state.username, token.user_id)
             this.props.history.push('/user')
         }else{
