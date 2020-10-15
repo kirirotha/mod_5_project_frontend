@@ -18,9 +18,9 @@ class CampgroundDetails extends React.Component{
                     <h1>{this.props.selectedCampground.properties.name}</h1> 
                     <div className="info-line" style={{display:'flex', justifyContent: 'space-evenly'}}>
                         <h3>Latitude:</h3>
-                        <p>{this.props.selectedCampground.properties.latitude}</p>
+                        <p>{Math.round(this.props.selectedCampground.properties.latitude * 100000) / 100000}</p>
                         <h3>Longitude:</h3>
-                        <p>{this.props.selectedCampground.properties.longitude}</p>
+                        <p>{Math.round(this.props.selectedCampground.properties.longitude* 100000) / 100000}</p>
                     </div>
                 </div>
                 

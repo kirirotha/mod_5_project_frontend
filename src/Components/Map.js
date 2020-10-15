@@ -83,7 +83,8 @@ class Map extends React.Component {
             selectedTrip: null,
             tripSelected: false,
             selectedTripCampgrounds: [],
-            showOnlyTrip: true
+            showOnlyTrip: true,
+            saveDisabled: true
         }
       }
 
@@ -229,6 +230,7 @@ class Map extends React.Component {
     closeTripDetailWindow = () =>{
         this.setState({
             ...this.state,
+            saveDisabled: true,
             tripSelected: false,
             selectedTripCampgrounds: []
         })
@@ -366,7 +368,7 @@ class Map extends React.Component {
     getMyTripVisits = (trip) =>{
         let campgrounds = []
         this.state.myVisits.forEach(campground =>{
-            if(campground.trip.id === trip.id){
+            if(campground.trip_id === trip.id){
                 campgrounds.push(
                         {
                             "type": "Feature",
@@ -378,6 +380,7 @@ class Map extends React.Component {
                             ]
                             },
                             "properties": {
+                                "trip_id": campground.trip_id,
                                 "id": campground.id,
                                 "name": campground.location_name,
                                 "description": campground.description,
@@ -399,6 +402,9 @@ class Map extends React.Component {
     }
 
     toggleCampsites = () =>{
+        if(this.state.showOnlyTrip === true){
+            this.fetchCampsites()
+        }
         this.setState({
             ...this.state,
             showOnlyTrip: !this.state.showOnlyTrip
@@ -406,12 +412,27 @@ class Map extends React.Component {
     }
 
     addCampsiteToTrip = () =>{
-        let selectedTripCampgrounds = this.state.selectedTripCampgrounds
-        selectedTripCampgrounds.push(this.state.selectedCampground)
         this.setState({
             ...this.state,
-            selectedTripCampgrounds: selectedTripCampgrounds
-        })
+            saveDisabled: false,
+            selectedCampground:{
+                ...this.state.selectedCampground,
+                properties: {
+                    ...this.state.selectedCampground.properties,
+                    trip_id: this.state.selectedTrip.id
+                }
+            }
+        },
+            () =>{
+                let selectedTripCampgrounds = this.state.selectedTripCampgrounds
+                selectedTripCampgrounds.push(this.state.selectedCampground)
+                this.setState({
+                    ...this.state,
+                    selectedTripCampgrounds: selectedTripCampgrounds
+                })
+            }
+        )
+        
     }
 
     deleteCampsiteFromTrip = (campgroundToRemove) => {
@@ -420,10 +441,105 @@ class Map extends React.Component {
                 return campground
             }
         })
-        console.log(selectedTripCampgrounds)
+        // console.log(selectedTripCampgrounds)
+        setTimeout(()=>{
+            this.setState({
+                ...this.state,
+                saveDisabled: false,
+                showDetail: false,
+                selectedTripCampgrounds: selectedTripCampgrounds,
+
+            })
+        },5)
+    }
+
+    updateTrip = (trip) => {
+        let myVisitsNew = []
+        this.state.myVisits.forEach(visit =>{
+            if(visit.trip_id === trip.id){
+                this.deleteVisit(visit)
+            }else{
+                myVisitsNew.push(visit)
+            }
+        })
         this.setState({
             ...this.state,
-            selectedTripCampgrounds: selectedTripCampgrounds
+            saveDisabled: true
+        })
+        setTimeout(() =>{
+            this.removeFromMyVisit(myVisitsNew)
+            this.state.selectedTripCampgrounds.forEach(visit =>{
+                this.createVisit(visit)
+            })
+        },2000)
+    }
+
+    deleteVisit = (visit) =>{
+        // console.log(visit.id)
+        fetch(`http://localhost:3001/visits/${visit.id}`,{
+            method: 'DELETE'
+        })
+        .then(res => res.json())
+        .then(data => {
+            // console.log(data)
+        })
+    }
+
+    removeFromMyVisit = (myVisitsNew) =>{
+        this.setState({
+            ...this.state,
+            saveDisabled: true,
+            myVisits: myVisitsNew
+        })
+    }
+
+    createVisit = (visit) =>{
+        // console.log(visit.properties.id)
+        const newData = {
+            trip_id: visit.properties.trip_id,
+            location_name: visit.properties.name,
+            latitude: visit.properties.latitude,
+            longitude: visit.properties.longitude,
+            description: visit.properties.description,
+            phone: visit.properties.phone,
+            email: visit.properties.email,
+            reservable: visit.properties.reservable,
+            date_visited: null
+        }
+        this.updateMyVisits(newData)
+        fetch(`http://localhost:3001/visits`,{
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(newData)
+        })
+        .then(res => res.json())
+        .then(visit =>{
+            // console.log(visit)
+        })
+    }
+
+    updateMyVisits = (visit) => {
+        let myVisits = this.state.myVisits
+        myVisits.push(visit)
+        this.setState({
+            ...this.state,
+            myVisits: myVisits
+        })
+    }
+
+    submitNewTrip = (trip) =>{
+        let publicTrips = this.state.publicTrips
+        let myTrips = this.state.myTrips
+        myTrips.push(trip)
+        if(trip.is_public === true){
+            publicTrips.push(trip)
+        }
+        this.setState({
+            ...this.state,
+            publicTrips: publicTrips,
+            myTrips: myTrips
         })
     }
 
@@ -471,6 +587,8 @@ class Map extends React.Component {
                                                                     toggleCampsites = {this.toggleCampsites}
                                                                     addCampsiteToTrip = {this.addCampsiteToTrip}
                                                                     deleteCampsiteFromTrip = {this.deleteCampsiteFromTrip}
+                                                                    updateTrip = {this.updateTrip}
+                                                                    saveDisabled = {this.state.saveDisabled}
                                                                     /> : null}</div>
                 <div>{this.state.showDetail === true ? <CampgroundDetails selectedCampground={this.state.selectedCampground} closeDetailWindow={this.closeDetailWindow}/> : null}</div>
             </div>  

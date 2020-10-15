@@ -444,6 +444,10 @@ a{
   background: #009600;
 }
 
+.trip-control-panel button:disabled{
+  background: grey!important;
+}
+
 .visit{
   background-color: rgba(255, 255, 255, 0.90);
   padding-left: 5px;

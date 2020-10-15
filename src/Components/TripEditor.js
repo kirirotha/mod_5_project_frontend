@@ -20,7 +20,7 @@ class TripEditor extends React.Component{
     }
 
     handleSaveClick = () =>{
-        console.log('save')
+        this.props.updateTrip(this.props.trip)
     }
 
     handleAddClick = () =>{
@@ -42,7 +42,7 @@ class TripEditor extends React.Component{
                 return(
                     <div key={index}>
                         <div className="visit" key={index} 
-                            onClick={() => this.handleClick(campground)}
+                            // onClick={() => this.handleClick(campground)}
                             onMouseEnter = {() => {this.handleEnter(campground, index)}}
                             onMouseLeave = {() => {this.handleLeave(index)}}
                             >
@@ -51,7 +51,7 @@ class TripEditor extends React.Component{
                                 <div className="delete-button" onClick={() => this.handleDeleteClick(campground)}>x</div>
                             </div>
                             <h3>{campground.properties.name}</h3>
-                            <p>{`Latitude: ${campground.properties.latitude}    Longitude: ${campground.properties.longitude}`} </p>
+                            <p>{`Latitude: ${Math.round(campground.properties.latitude * 100000) / 100000}    Longitude: ${Math.round(campground.properties.longitude * 100000)/100000}`} </p>
                         </div>
                     </div>
                 )
@@ -70,7 +70,7 @@ class TripEditor extends React.Component{
                     {this.renderVisits()}
                 </div>
                 <div className="trip-control-panel">
-                    <button id="save" onClick={this.handleSaveClick}>Save Trip Changes</button>
+                    <button id="save" onClick={this.handleSaveClick} disabled={this.props.saveDisabled ? true : false}>Save Trip Changes</button>
                     <button id="add-campsite" onClick={this.handleAddClick}>Add Selected Campsite</button>
                 </div>
                 <div className="toggle-view">
