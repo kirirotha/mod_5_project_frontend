@@ -21,6 +21,7 @@ class TripEditor extends React.Component{
 
     handleSaveClick = () =>{
         this.props.updateTrip(this.props.trip)
+        this.props.toggleCampsites()
     }
 
     handleAddClick = () =>{
@@ -71,7 +72,7 @@ class TripEditor extends React.Component{
                 </div>
                 <div className="trip-control-panel">
                     <button id="save" onClick={this.handleSaveClick} disabled={this.props.saveDisabled ? true : false}>Save Trip Changes</button>
-                    <button id="add-campsite" onClick={this.handleAddClick}>Add Selected Campsite</button>
+                    <button id="add-campsite" onClick={this.handleAddClick} disabled={this.props.showDetail ? false : true}>Add Selected Campsite</button>
                 </div>
                 <div className="toggle-view">
                     <button id="toggle-camp-render" 

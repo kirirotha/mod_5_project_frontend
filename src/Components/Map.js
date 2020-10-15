@@ -1,8 +1,9 @@
 import React from 'react';
 import { withRouter } from 'react-router';
 
+// import Mapbox, {Layer, Feature } from 'mapbox'
 import Geocoder from 'react-mapbox-gl-geocoder';
-import MapGL, { Marker, Popup } from 'react-map-gl';
+import MapGL, { Layer, Marker, Popup} from 'react-map-gl';
 
 
 // import { Link } from 'react-router-dom';
@@ -84,7 +85,9 @@ class Map extends React.Component {
             tripSelected: false,
             selectedTripCampgrounds: [],
             showOnlyTrip: true,
-            saveDisabled: true
+            saveDisabled: true,
+            showRoute: false,
+            route: {}
         }
       }
 
@@ -527,6 +530,7 @@ class Map extends React.Component {
         },
         () =>{
             setTimeout(() =>this.fetchVisits(), 200)
+            this.getDirections()
         }
         )
     }
@@ -602,7 +606,60 @@ class Map extends React.Component {
         })
     }
 
+    parseWaypoints = () =>{
+        let waypoints = []
+        this.state.selectedTripCampgrounds.forEach(visit =>{
+            waypoints.push(`${visit.properties.longitude},${visit.properties.latitude}`)
+        })
+        return waypoints.join(';')
+    }
+
+    getDirections = () =>{
+        // let waypoints = `-106.0337898,40.5166418;-114.224196,48.722654`
+        let waypoints = this.parseWaypoints()
+        fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${waypoints}?geometries=geojson&access_token=${ACCESS_TOKEN}`)
+        .then(res => res.json())
+        .then(route =>{
+            console.log(route.routes[0].geometry.coordinates)
+            this.setState({
+                ...this.state,
+                showRoute: true,
+                route: route.routes[0].geometry.coordinates
+            })
+        })
+    }
+
+    
+
+    renderRoute = () =>{
+        if(this.state.route){
+            let routeLayer = {id: 'end',
+                    type: 'line',
+                    source: {
+                    type: 'geojson',
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [{
+                        type: 'Feature',
+                        properties: {},
+                        geometry: {
+                                type: 'LineString',
+                                coordinates: this.state.route
+                            }
+                        }]
+                    }
+                }
+            }
+            return(
+                <Layer {...routeLayer} 
+                    paint={{'line-width': 5,'line-color': '#3887be', 'line-opacity': .75}}
+                    />
+            )
+        }
+    }
+
     render(){
+        
         let viewport = this.state.viewport;
         return (
             <div id="map-container" onClick={() => this.handleMapClick()}>
@@ -621,15 +678,14 @@ class Map extends React.Component {
                     />
                 </div>
                 <div className="map-container">
-                    <MapGL
-                        mapboxApiAccessToken={ACCESS_TOKEN}
-                        mapStyle="mapbox://styles/mapbox/streets-v11"
+                    <MapGL mapboxApiAccessToken={ACCESS_TOKEN}
+                        mapStyle="mapbox://styles/kirirotha/ckfycxc4q052819nz3nft7p8e"
                         {...viewport}
                         {...mapStyle}
-                        onViewportChange={(viewport) => this.setState({...this.state, viewport: viewport})}
-                    >
-                        {this.renderMarkers()}
-                        {this.renderPopup()}
+                        onViewportChange={(viewport) => this.setState({...this.state, viewport: viewport})}>
+                            {this.renderMarkers()}
+                            {this.renderPopup()}
+                            {this.state.showRoute ? this.renderRoute() : null}
                     </MapGL>
                 </div>
                 <div>{this.state.mode === 'browse' ? <BrowseTrips/> : null}</div>
@@ -648,6 +704,7 @@ class Map extends React.Component {
                                                                     deleteCampsiteFromTrip = {this.deleteCampsiteFromTrip}
                                                                     updateTrip = {this.updateTrip}
                                                                     saveDisabled = {this.state.saveDisabled}
+                                                                    showDetail = {this.state.showDetail}
                                                                     /> : null}</div>
                 <div>{this.state.showDetail === true ? <CampgroundDetails selectedCampground={this.state.selectedCampground} closeDetailWindow={this.closeDetailWindow}/> : null}</div>
             </div>  
