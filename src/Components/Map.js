@@ -90,7 +90,7 @@ class Map extends React.Component {
 
 
     componentDidMount(){
-        this.fetchCampsites()
+        this.initialCampgroundFetch()
         this.fetchTrips()
         this.fetchVisits()
     }
@@ -164,6 +164,23 @@ class Map extends React.Component {
             ...this.state,
             publicVisits: publicVisits
         })
+    }
+
+    initialCampgroundFetch = () =>{
+        const myproxyurl = "https://morning-waters-34270.herokuapp.com/"
+        const url = `https://ridb.recreation.gov/api/v1/facilities?query=Campground&limit=50&apikey=${API_KEY}`
+            fetch(myproxyurl + url)
+            .then(res => res.json())
+            .then(campgrounds =>{
+                console.log(campgrounds)
+                // this.convertToMapObjects(campgrounds)
+                this.setState({
+                    campgroundsRaw: campgrounds.RECDATA
+                },
+                () => this.convertToMapObjects()
+                )
+            })
+            .catch(() => console.log("Failed"))
     }
 
     fetchCampsites = () =>{
@@ -253,7 +270,26 @@ class Map extends React.Component {
             ...this.state,
             showDetail: true,
             selectedCampground: campground
-        })        
+        },
+            () => {this.handleZoom()}
+        )        
+    }
+
+    handleZoom = () =>{
+        if(this.state.viewport.zoom < 6){
+            let newZoom = 8.75
+            let newLat = this.state.selectedCampground.properties.latitude
+            let newLng = this.state.selectedCampground.properties.longitude
+            this.setState({
+                ...this.state,
+                viewport:{
+                    longitude: newLng,
+                    latitude: newLat,
+                    zoom: newZoom},
+            },
+                () => this.fetchCampsites()
+            )     
+        }   
     }
 
     handleOnMouseEnter = (campground,index) =>{
@@ -322,6 +358,8 @@ class Map extends React.Component {
                 key={index}
                 longitude={campground.properties.longitude}
                 latitude={campground.properties.latitude}
+                offsetLeft={-20}
+                offsetTop={-12}
                 >
                 <div className="marker" 
                     onClick = {() => {this.handleCampgroundClick(campground)}}
@@ -345,8 +383,6 @@ class Map extends React.Component {
                     closeButton={false}
                     closeOnClick={false}
                     anchor='bottom-left'
-                    offsetLeft={16}
-                    offsetTop={12}
                 >
                 <h3>{this.state.popupName}</h3>
                 </Popup>
@@ -428,7 +464,8 @@ class Map extends React.Component {
                 selectedTripCampgrounds.push(this.state.selectedCampground)
                 this.setState({
                     ...this.state,
-                    selectedTripCampgrounds: selectedTripCampgrounds
+                    selectedTripCampgrounds: selectedTripCampgrounds,
+                    showDetail: false
                 })
             }
         )
@@ -437,8 +474,14 @@ class Map extends React.Component {
 
     deleteCampsiteFromTrip = (campgroundToRemove) => {
         let selectedTripCampgrounds = this.state.selectedTripCampgrounds.filter(campground =>{
-            if(campground.properties.id !== campgroundToRemove.properties.id){
-                return campground
+            if(campgroundToRemove.properties.id){
+                if(campground.properties.id !== campgroundToRemove.properties.id){
+                    return campground
+                }
+            }else{
+                if(campground.properties.name !== campgroundToRemove.properties.name || campground.properties.latitude !== campgroundToRemove.properties.latitude || campground.properties.longitude !== campgroundToRemove.properties.longitude){
+                    return campground
+                }
             }
         })
         // console.log(selectedTripCampgrounds)
@@ -450,7 +493,7 @@ class Map extends React.Component {
                 selectedTripCampgrounds: selectedTripCampgrounds,
 
             })
-        },5)
+        },50)
     }
 
     updateTrip = (trip) => {
@@ -462,36 +505,52 @@ class Map extends React.Component {
                 myVisitsNew.push(visit)
             }
         })
+        this.state.selectedTripCampgrounds.forEach(visit =>{
+            const newData = {
+                trip_id: visit.properties.trip_id,
+                location_name: visit.properties.name,
+                latitude: visit.properties.latitude,
+                longitude: visit.properties.longitude,
+                description: visit.properties.description,
+                phone: visit.properties.phone,
+                email: visit.properties.email,
+                reservable: visit.properties.reservable,
+                date_visited: null
+            }
+            myVisitsNew.push(newData)
+            this.createVisit(visit)
+        })
         this.setState({
             ...this.state,
-            saveDisabled: true
-        })
-        setTimeout(() =>{
-            this.removeFromMyVisit(myVisitsNew)
-            this.state.selectedTripCampgrounds.forEach(visit =>{
-                this.createVisit(visit)
-            })
-        },2000)
+            saveDisabled: true,
+            // myVisits: myVisitsNew
+        },
+        () =>{
+            setTimeout(() =>this.fetchVisits(), 200)
+        }
+        )
     }
 
     deleteVisit = (visit) =>{
         // console.log(visit.id)
-        fetch(`http://localhost:3001/visits/${visit.id}`,{
-            method: 'DELETE'
-        })
-        .then(res => res.json())
-        .then(data => {
-            // console.log(data)
-        })
+        if(visit.id){
+            fetch(`http://localhost:3001/visits/${visit.id}`,{
+                method: 'DELETE'
+            })
+            .then(res => res.json())
+            .then(data => {
+                // console.log(data)
+            })
+        }
     }
 
-    removeFromMyVisit = (myVisitsNew) =>{
-        this.setState({
-            ...this.state,
-            saveDisabled: true,
-            myVisits: myVisitsNew
-        })
-    }
+    // removeFromMyVisit = (myVisitsNew) =>{
+    //     this.setState({
+    //         ...this.state,
+    //         saveDisabled: true,
+    //         myVisits: myVisitsNew
+    //     })
+    // }
 
     createVisit = (visit) =>{
         // console.log(visit.properties.id)
@@ -506,7 +565,7 @@ class Map extends React.Component {
             reservable: visit.properties.reservable,
             date_visited: null
         }
-        this.updateMyVisits(newData)
+        // this.updateMyVisits(newData)
         fetch(`http://localhost:3001/visits`,{
             method: "POST",
             headers: {
@@ -550,7 +609,7 @@ class Map extends React.Component {
                 <div className="nav-bar">
                     <Navbar handleLogOut={this.props.handleLogOut} changeMode={this.changeMode} mode={this.state.mode}/>
                 </div>
-                {/* <div className="map-search" >
+                <div className="map-search" >
                     <div className="search-icon"></div>
                     <Geocoder
                         mapboxApiAccessToken={ACCESS_TOKEN}
@@ -572,7 +631,7 @@ class Map extends React.Component {
                         {this.renderMarkers()}
                         {this.renderPopup()}
                     </MapGL>
-                </div> */}
+                </div>
                 <div>{this.state.mode === 'browse' ? <BrowseTrips/> : null}</div>
                 <div>{this.state.mode === 'myTrips' && this.state.tripSelected === false ? <MyTrips myTrips={this.state.myTrips} 
                                                                 handleMyTripClick={this.handleMyTripClick}/> : null}</div>

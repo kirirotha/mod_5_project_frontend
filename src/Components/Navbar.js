@@ -17,12 +17,27 @@ class Navbar extends React.Component{
     handleDropdownClick = () =>{
         this.setState({
             dropdownActive: !this.state.dropdownActive
-        })
+        },
+         () =>{
+             setTimeout(() =>{
+                this.setState({
+                    dropdownActive: false
+                })
+             }, 5000)
+         }
+        )
     }
 
     handleDropdownItemClick = (e) =>{
         this.setState({
             dropdownActive: false
+        },
+        () =>{
+            setTimeout(() =>{
+               this.setState({
+                   dropdownActive: false
+               })
+            }, 5000)
         })
         this.props.changeMode(e.target.value)
     }

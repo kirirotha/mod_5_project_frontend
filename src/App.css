@@ -278,9 +278,15 @@ a{
 .marker {
   background-image: url('./images/camping-tent-icon-4.png');
   background-size: cover;
+  opacity: 0.9;
   width: 30px;
   height: 30px;
   border-radius: 50%;
+  cursor: pointer;
+}
+
+.marker:hover{
+  opacity: 1;
   cursor: pointer;
 }
 
