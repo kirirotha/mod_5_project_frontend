@@ -208,6 +208,29 @@ a{
   display: none;
 }
 
+.address-search-results{
+  position: absolute;
+  left: 36px;
+  top: 200px;
+  background-color: #b3b3b3;
+  margin-top: 10px;
+  width: 80%;
+  color: black;
+}
+.address-search-item{
+  left: 36px;
+  background-color: rgba(255, 255, 255, 0.4);
+  width: 100%;
+  color: black;
+  border: 0.5px solid black;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+}
+
+.address-search-item:hover {
+  background-color: rgba(0, 0, 0, 0.45);
+  color: #FFFFFF;
+  cursor: pointer;
+}
 
 .map-container{
   position: absolute;
@@ -282,6 +305,15 @@ a{
   width: 30px;
   height: 30px;
   border-radius: 50%;
+  cursor: pointer;
+}
+
+.house-marker {
+  background-image: url('./images/house-icon.png');
+  background-size: cover;
+  opacity: 0.6;
+  width: 25px;
+  height: 25px;
   cursor: pointer;
 }
 

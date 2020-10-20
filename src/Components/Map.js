@@ -87,7 +87,8 @@ class Map extends React.Component {
             showOnlyTrip: true,
             saveDisabled: true,
             showRoute: false,
-            route: {}
+            route: {},
+            user: {}
         }
       }
 
@@ -96,11 +97,24 @@ class Map extends React.Component {
         this.initialCampgroundFetch()
         this.fetchTrips()
         this.fetchVisits()
+        this.fetchUser()
     }
 
     clearMarkers= () => {
         markers.forEach((marker) => marker.remove());
         markers = [];
+    }
+
+    fetchUser = () =>{
+        fetch(`http://localhost:3001/users/${Number(localStorage.getItem('user_id'))}`)
+        .then(res => res.json())
+        .then(user =>{
+            console.log(user)
+            this.setState({
+                ...this.state,
+                user: user
+            })
+        })
     }
 
     fetchTrips = () =>{
@@ -365,18 +379,100 @@ class Map extends React.Component {
                 offsetLeft={-20}
                 offsetTop={-12}
                 >
-                <div className="marker" 
+                {campground.properties.name === "Home" ?
+                <div className="house-marker"
                     onClick = {() => {this.handleCampgroundClick(campground)}}
                     onMouseEnter = {() => {this.handleOnMouseEnter(campground, index)}}
                     onMouseLeave = {() => {this.handleOnMouseLeave(index)}}
                     >
                 
                 </div>
+                :
+                <div className="marker"
+                    onClick = {() => {this.handleCampgroundClick(campground)}}
+                    onMouseEnter = {() => {this.handleOnMouseEnter(campground, index)}}
+                    onMouseLeave = {() => {this.handleOnMouseLeave(index)}}
+                    >
                 
+                </div>
+                }       
               </Marker>
             )
           })
     }
+
+    renderHouseMarker = () =>{
+        let latitude = null
+        let longitude = null
+        if(this.state.user.home_latitude){
+            latitude = Number(this.state.user.home_latitude)
+            longitude = Number(this.state.user.home_longitude)
+        }
+        if (this.state.user.home_latitude){
+            return(
+                <Marker
+                longitude={longitude}
+                latitude={latitude}
+                offsetLeft={-20}
+                offsetTop={-12}
+                >
+                <div className="house-marker" 
+                    onClick = {() => {this.handleHomeClick()}}
+                    onMouseEnter = {() => {this.handleOnMouseHomeEnter()}}
+                    onMouseLeave = {() => {this.handleOnMouseHomeLeave()}}
+                    >
+                
+                </div>
+                
+            </Marker>
+            )
+        }
+    }
+
+    handleHomeClick = () =>{
+        let home ={
+            "type": "Feature",
+            "geometry": {
+            "type": "Point",
+            "coordinates": [
+                Number(this.state.user.home_longitude),
+                Number(this.state.user.home_latitude)
+            ]},
+            properties: {description: `${this.state.user.street} <br> ${this.state.user.city}, ${this.state.user.state} ${this.state.user.zip}`,
+                latitude: Number(this.state.user.home_latitude),
+                longitude: Number(this.state.user.home_longitude),
+                name: "Home" }}
+        this.setState({
+            ...this.state,
+            showDetail: true,
+            selectedCampground: home
+        },
+            () => {this.handleZoom()}
+        )        
+    }
+
+    handleOnMouseHomeEnter = () =>{
+        this.setState({
+            ...this.state,
+            showPopup: true,
+            popupLat: Number(this.state.user.home_latitude),
+            popupLon: Number(this.state.user.home_longitude),
+            popupName: "Home",
+        }        )        
+    }
+
+    handleOnMouseHomeLeave = () =>{
+        this.setState({
+            ...this.state,
+            showPopup: false,
+            popupLat: null,
+            popupLon: null,
+            popupName: "",
+            campgroundIndex: null
+        })   
+    }
+
+    
 
     renderPopup = () =>{
         if(this.state.showPopup && this.state.popupLon && this.state.popupLat){
@@ -647,7 +743,6 @@ class Map extends React.Component {
     getDirections = () =>{
         // let waypoints = `-106.0337898,40.5166418;-114.224196,48.722654`
         let waypoints = this.parseWaypoints()
-        debugger
         if(waypoints !== ""){
             fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${waypoints}?geometries=geojson&access_token=${ACCESS_TOKEN}`)
             .then(res => res.json())
@@ -764,6 +859,7 @@ class Map extends React.Component {
                         {...viewport}
                         {...mapStyle}
                         onViewportChange={(viewport) => this.setState({...this.state, viewport: viewport})}>
+                        {this.state.user? this.renderHouseMarker() : null}
                         {this.renderMarkers()}
                         {this.renderPopup()}
                         {this.state.showRoute ? this.renderRoute() : null}

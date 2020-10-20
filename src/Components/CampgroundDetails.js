@@ -10,6 +10,38 @@ class CampgroundDetails extends React.Component{
         this.props.closeDetailWindow()
     }
 
+    renderPhone = () =>{
+        if(this.props.selectedCampground.properties.phone){
+            return(
+                <div className="info-line">
+                    <h3>Phone:</h3>
+                    <p>{this.props.selectedCampground.properties.phone ? this.props.selectedCampground.properties.phone : null}</p>
+                </div>
+            )
+        }
+    }
+
+    renderEmail = () =>{
+        if(this.props.selectedCampground.properties.email){
+            return(<div className="info-line">
+                        <h3>Email:</h3>
+                        <p>{this.props.selectedCampground.properties.email ? this.props.selectedCampground.properties.email : null}</p>
+                    </div>
+                    )
+        }
+    }
+
+    renderReservable = () =>{
+        if(this.props.selectedCampground.properties.reservable){
+            return(
+                <div className="info-line">
+                    <h3>Reservable:</h3>
+                    <p>{this.props.selectedCampground.properties.reservable ? "Yes" : "No"}</p> 
+                </div>
+            )
+        }
+    }
+
     render(){
         return(
             <div className="detail-panel">
@@ -26,19 +58,9 @@ class CampgroundDetails extends React.Component{
                 
                 <div className="campground-details" dangerouslySetInnerHTML={this.renderDetails()}></div>
                 <div className="campground-info">
-                    
-                    <div className="info-line">
-                        <h3>Phone:</h3>
-                        <p>{this.props.selectedCampground.properties.phone ? this.props.selectedCampground.properties.phone : null}</p>
-                    </div>
-                    <div className="info-line">
-                        <h3>Email:</h3>
-                        <p>{this.props.selectedCampground.properties.email ? this.props.selectedCampground.properties.email : null}</p>
-                    </div>
-                    <div className="info-line">
-                        <h3>Reservable:</h3>
-                        <p>{this.props.selectedCampground.properties.reservable ? "Yes" : "No"}</p> 
-                    </div>
+                    {this.renderPhone()}
+                    {this.renderEmail()}
+                    {this.renderReservable()}
                 </div>
             </div>
         )
