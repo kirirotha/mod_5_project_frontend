@@ -1,6 +1,9 @@
 import React from 'react';
 
 class TripEditor extends React.Component{
+    state={
+        selectedIndex: null
+    }
 
 
     handleCloseClick = () =>{
@@ -21,7 +24,6 @@ class TripEditor extends React.Component{
 
     handleSaveClick = () =>{
         this.props.updateTrip(this.props.trip)
-        this.props.toggleCampsites()
     }
 
     handleAddClick = () =>{
@@ -38,7 +40,10 @@ class TripEditor extends React.Component{
 
     renderVisits = () =>{
         let index = 0
-            return this.props.selectedTripCampgrounds.map(campground =>{
+        let sortedCampgrounds = this.props.selectedTripCampgrounds.sort((a,b) =>{
+            return a.properties.stop_number - b.properties.stop_number
+        })
+            return sortedCampgrounds.map(campground =>{
                 index ++
                 return(
                     <div key={index}>

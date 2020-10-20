@@ -3,7 +3,7 @@ import { withRouter } from 'react-router';
 
 // import Mapbox, {Layer, Feature } from 'mapbox'
 import Geocoder from 'react-mapbox-gl-geocoder';
-import MapGL, { Layer, Marker, Popup} from 'react-map-gl';
+import MapGL, { Source, Layer, Marker, Popup} from 'react-map-gl';
 
 
 // import { Link } from 'react-router-dom';
@@ -250,6 +250,7 @@ class Map extends React.Component {
     closeTripDetailWindow = () =>{
         this.setState({
             ...this.state,
+            showRoute: false,
             saveDisabled: true,
             tripSelected: false,
             selectedTripCampgrounds: []
@@ -396,9 +397,20 @@ class Map extends React.Component {
     }
 
     handleMyTripClick = (trip) =>{
+        let route
+        if(trip.route){
+            let tripParsed = trip.route.split('_')
+            route = tripParsed.map(leg =>{
+                let legSplit = leg.split(',')
+                return [Number(legSplit[0]), Number(legSplit[1])]
+            })
+        }
         this.setState({
             ...this.state,
-            selectedTrip: trip
+            route: route,
+            showRoute: true,
+            selectedTrip: trip,
+            showOnlyTrip: true
         },
            () => this.getMyTripVisits(trip)
         )
@@ -419,6 +431,7 @@ class Map extends React.Component {
                             ]
                             },
                             "properties": {
+                                "stop_number": campground.stop_number,
                                 "trip_id": campground.trip_id,
                                 "id": campground.id,
                                 "name": campground.location_name,
@@ -437,7 +450,12 @@ class Map extends React.Component {
             ...this.state,
             tripSelected: true,
             selectedTripCampgrounds: campgrounds
-        })
+        },
+            () => {
+                this.renderMarkers()
+                // setTimeout(() => this.sortTripVisits(), 100)
+            }
+        )
     }
 
     toggleCampsites = () =>{
@@ -458,7 +476,8 @@ class Map extends React.Component {
                 ...this.state.selectedCampground,
                 properties: {
                     ...this.state.selectedCampground.properties,
-                    trip_id: this.state.selectedTrip.id
+                    stop_number: this.state.selectedTripCampgrounds.length+1,
+                    trip_id: this.state.selectedTrip.id,
                 }
             }
         },
@@ -508,8 +527,11 @@ class Map extends React.Component {
                 myVisitsNew.push(visit)
             }
         })
+        let index = 0
         this.state.selectedTripCampgrounds.forEach(visit =>{
+            index++
             const newData = {
+                stop_number: visit.properties.stop_number,
                 trip_id: visit.properties.trip_id,
                 location_name: visit.properties.name,
                 latitude: visit.properties.latitude,
@@ -521,11 +543,13 @@ class Map extends React.Component {
                 date_visited: null
             }
             myVisitsNew.push(newData)
-            this.createVisit(visit)
+            this.createVisit(visit, index)
         })
         this.setState({
             ...this.state,
             saveDisabled: true,
+            showOnlyTrip:   true,
+            showPopup: false,
             // myVisits: myVisitsNew
         },
         () =>{
@@ -559,6 +583,7 @@ class Map extends React.Component {
     createVisit = (visit) =>{
         // console.log(visit.properties.id)
         const newData = {
+            stop_number: visit.properties.stop_number,
             trip_id: visit.properties.trip_id,
             location_name: visit.properties.name,
             latitude: visit.properties.latitude,
@@ -579,7 +604,7 @@ class Map extends React.Component {
         })
         .then(res => res.json())
         .then(visit =>{
-            // console.log(visit)
+            console.log(visit)
         })
     }
 
@@ -602,13 +627,18 @@ class Map extends React.Component {
         this.setState({
             ...this.state,
             publicTrips: publicTrips,
-            myTrips: myTrips
+            myTrips: myTrips,
+            selectedTrip: trip,
+            mode: 'myTrips'
         })
     }
 
     parseWaypoints = () =>{
         let waypoints = []
-        this.state.selectedTripCampgrounds.forEach(visit =>{
+        let sortedCampgrounds = this.state.selectedTripCampgrounds.sort((a,b) =>{
+            return a.stop_number - b.stop_number
+        })
+        sortedCampgrounds.forEach(visit =>{
             waypoints.push(`${visit.properties.longitude},${visit.properties.latitude}`)
         })
         return waypoints.join(';')
@@ -617,43 +647,94 @@ class Map extends React.Component {
     getDirections = () =>{
         // let waypoints = `-106.0337898,40.5166418;-114.224196,48.722654`
         let waypoints = this.parseWaypoints()
-        fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${waypoints}?geometries=geojson&access_token=${ACCESS_TOKEN}`)
-        .then(res => res.json())
-        .then(route =>{
-            console.log(route.routes[0].geometry.coordinates)
+        debugger
+        if(waypoints !== ""){
+            fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${waypoints}?geometries=geojson&access_token=${ACCESS_TOKEN}`)
+            .then(res => res.json())
+            .then(route =>{
+                    if(route.routes){
+                    this.setState({
+                        ...this.state,
+                        showRoute: true,
+                        route: route.routes[0].geometry.coordinates
+                    },
+                        () => setTimeout(() =>this.updateRouteInDb(), 100)
+                    )
+                }
+            })
+        }else{
             this.setState({
                 ...this.state,
                 showRoute: true,
-                route: route.routes[0].geometry.coordinates
-            })
-        })
+                route: []
+            },
+                () => setTimeout(() =>this.updateRouteInDb(), 100)
+            )
+        }
     }
 
-    
+    updateRouteInDb = () =>{
+        if(this.state.route){
+            let patchData
+            if(this.state.selectedTripCampgrounds !== []){
+                patchData = {
+                    route: this.state.route.join('_')
+                }
+            }else{
+                patchData = {
+                    route: ""
+                }
+            }
+            fetch(`http://localhost:3001/trips/${this.state.selectedTrip.id}`,{
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(patchData)
+            })
+            .then(res => res.json())
+            .then(trip =>{
+                console.log(trip)
+                let route
+                if(trip.route){
+                    let tripParsed = trip.route.split('_')
+                    route = tripParsed.map(leg =>{
+                        let legSplit = leg.split(',')
+                        return [Number(legSplit[0]), Number(legSplit[1])]
+                    })
+                }
+                this.setState({
+                    ...this.state,
+                    route: route,
+                    showRoute: true,
+                    selectedTrip: trip
+                },
+                   () => setTimeout(() => this.getMyTripVisits(trip))
+                )
+            })
+        }
+    }
 
     renderRoute = () =>{
         if(this.state.route){
-            let routeLayer = {id: 'end',
-                    type: 'line',
-                    source: {
-                    type: 'geojson',
-                    data: {
-                        type: 'FeatureCollection',
-                        features: [{
-                        type: 'Feature',
-                        properties: {},
-                        geometry: {
-                                type: 'LineString',
-                                coordinates: this.state.route
-                            }
-                        }]
-                    }
+            let routeLayer = {
+                id: 'route',
+                type: 'geojson',
+                data: {
+                    type: 'Feature',
+                    geometry: {
+                            type: 'LineString',
+                            coordinates: this.state.route
+                        }
                 }
             }
             return(
-                <Layer {...routeLayer} 
+                <>
+                <Source {...routeLayer}></Source>
+                <Layer id='route' type='line' source='route'
                     paint={{'line-width': 5,'line-color': '#3887be', 'line-opacity': .75}}
                     />
+                </>
             )
         }
     }
@@ -683,9 +764,9 @@ class Map extends React.Component {
                         {...viewport}
                         {...mapStyle}
                         onViewportChange={(viewport) => this.setState({...this.state, viewport: viewport})}>
-                            {this.renderMarkers()}
-                            {this.renderPopup()}
-                            {this.state.showRoute ? this.renderRoute() : null}
+                        {this.renderMarkers()}
+                        {this.renderPopup()}
+                        {this.state.showRoute ? this.renderRoute() : null}
                     </MapGL>
                 </div>
                 <div>{this.state.mode === 'browse' ? <BrowseTrips/> : null}</div>

@@ -28,8 +28,8 @@ class CreateTrip extends React.Component{
         body: JSON.stringify(newTrip)
         })
         .then(res => res.json())
-        .then(newTrip =>{
-            this.props.submitNewTrip(newTrip)
+        .then(trip =>{
+            this.props.submitNewTrip(trip)
         })
     }
 
