@@ -14,6 +14,7 @@ import CreateTrip from './CreateTrip';
 import CampgroundDetails from './CampgroundDetails';
 import TripEditor from './TripEditor';
 import TripDetails from './TripDetails';
+import EditAddress from './EditAddress';
 
 
 
@@ -86,14 +87,15 @@ class Map extends React.Component {
             selectedTrip: null,
             tripSelected: false,
             selectedTripCampgrounds: [],
-            showOnlyTrip: true,
+            showOnlyTrip: false,
             saveDisabled: true,
             showRoute: false,
             route: {},
             user: {},
             showTripDetails: false,
             weather: {},
-            initialCampgrounds: []
+            initialCampgrounds: [],
+            editUser: false
         }
       }
 
@@ -135,6 +137,8 @@ class Map extends React.Component {
         const myTrips = trips.filter(trip =>{
             if(trip.user.id === Number(localStorage.user_id)){
                 return trip
+            }else{
+                return null
             }
         })
         this.setState({
@@ -147,6 +151,8 @@ class Map extends React.Component {
         const publicTrips = trips.filter(trip =>{
             if(trip.is_public === true){
                 return trip
+            }else{
+                return null
             }
         })
         this.setState({
@@ -168,6 +174,8 @@ class Map extends React.Component {
         const myVisits = visits.filter(visit =>{
             if(visit.trip.user_id === Number(localStorage.user_id)){
                 return visit
+            }else{
+                return null
             }
         })
         this.setState({
@@ -180,6 +188,8 @@ class Map extends React.Component {
         const publicVisits = visits.filter(visit =>{
             if(visit.trip.is_public === true){
                 return visit
+            }else{
+                return null
             }
         })
         this.setState({
@@ -274,6 +284,7 @@ class Map extends React.Component {
             showRoute: false,
             saveDisabled: true,
             tripSelected: false,
+            showOnlyTrip: false,
             selectedTripCampgrounds: []
         })
     }
@@ -283,11 +294,23 @@ class Map extends React.Component {
     }
 
     changeMode = (newMode) =>{
-        this.setState({
-            ...this.state,
-            tripSelected: false,
-            mode: newMode
-        })
+        if(newMode === 'explore'){
+            this.closeTripDetailWindow()
+            this.setState({
+                ...this.state,
+                tripSelected: false,
+                showOnlyTrip: false,
+                mode: newMode,
+                showRoute: false,
+                selectedTripCampgrounds: []
+            })
+        }else{
+            this.setState({
+                ...this.state,
+                tripSelected: false,
+                mode: newMode
+            })
+        }
     }
 
     handleCampgroundClick = (campground) =>{
@@ -387,40 +410,74 @@ class Map extends React.Component {
 
     renderMarkers = () =>{
         let campgroundList
-        if(this.state.showOnlyTrip === true && (this.state.mode === "browse" || this.state.mode === "myTrips")){
-            campgroundList = this.state.selectedTripCampgrounds
-        }else{
+        if(this.state.showOnlyTrip !== true){
             campgroundList = this.state.campgrounds.features
+            return campgroundList.map((campground, index) => {
+                return(
+                    <Marker
+                    key={index}
+                    longitude={campground.properties.longitude}
+                    latitude={campground.properties.latitude}
+                    offsetLeft={-20}
+                    offsetTop={-12}
+                    >
+                    {campground.properties.name === "Home" ?
+                    <div className="house-marker"
+                        onClick = {() => {this.handleCampgroundClick(campground)}}
+                        onMouseEnter = {() => {this.handleOnMouseEnter(campground, index)}}
+                        onMouseLeave = {() => {this.handleOnMouseLeave(index)}}
+                        >
+                    
+                    </div>
+                    :
+                    <div className="marker"
+                        onClick = {() => {this.handleCampgroundClick(campground)}}
+                        onMouseEnter = {() => {this.handleOnMouseEnter(campground, index)}}
+                        onMouseLeave = {() => {this.handleOnMouseLeave(index)}}
+                        >
+                    
+                    </div>
+                    }       
+                </Marker>
+                )
+            })
         }
-        return campgroundList.map((campground, index) => {
-            return(
-                <Marker
-                key={index}
-                longitude={campground.properties.longitude}
-                latitude={campground.properties.latitude}
-                offsetLeft={-20}
-                offsetTop={-12}
-                >
-                {campground.properties.name === "Home" ?
-                <div className="house-marker"
-                    onClick = {() => {this.handleCampgroundClick(campground)}}
-                    onMouseEnter = {() => {this.handleOnMouseEnter(campground, index)}}
-                    onMouseLeave = {() => {this.handleOnMouseLeave(index)}}
+    }
+
+    renderTripMarkers = () =>{
+        let campgroundList
+        if(this.state.mode === "browse" || this.state.mode === "myTrips"){
+            campgroundList = this.state.selectedTripCampgrounds
+            return campgroundList.map((campground, index) => {
+                return(
+                    <Marker
+                    key={index}
+                    longitude={campground.properties.longitude}
+                    latitude={campground.properties.latitude}
+                    offsetLeft={-20}
+                    offsetTop={-12}
                     >
-                
-                </div>
-                :
-                <div className="marker"
-                    onClick = {() => {this.handleCampgroundClick(campground)}}
-                    onMouseEnter = {() => {this.handleOnMouseEnter(campground, index)}}
-                    onMouseLeave = {() => {this.handleOnMouseLeave(index)}}
-                    >
-                
-                </div>
-                }       
-              </Marker>
-            )
-          })
+                    {campground.properties.name === "Home" ?
+                    <div className="house-marker"
+                        onClick = {() => {this.handleCampgroundClick(campground)}}
+                        onMouseEnter = {() => {this.handleOnMouseEnter(campground, index)}}
+                        onMouseLeave = {() => {this.handleOnMouseLeave(index)}}
+                        >
+                    
+                    </div>
+                    :
+                    <div className="trip-marker"
+                        onClick = {() => {this.handleCampgroundClick(campground)}}
+                        onMouseEnter = {() => {this.handleOnMouseEnter(campground, index)}}
+                        onMouseLeave = {() => {this.handleOnMouseLeave(index)}}
+                        >
+                    
+                    </div>
+                    }       
+                </Marker>
+                )
+            })
+        }
     }
 
     renderHouseMarker = () =>{
@@ -534,6 +591,76 @@ class Map extends React.Component {
         )
     }
 
+    handleTripEnter = (trip) =>{
+        let route
+        if(trip.route){
+            let tripParsed = trip.route.split('_')
+            route = tripParsed.map(leg =>{
+                let legSplit = leg.split(',')
+                return [Number(legSplit[0]), Number(legSplit[1])]
+            })
+        }
+        this.setState({
+            ...this.state,
+            route: route,
+            showRoute: true,
+            selectedTrip: trip,
+            showOnlyTrip: true
+        },
+        () => this.getMyTripVisitsHover(trip)
+        )
+    }
+
+    handleTripLeave = () => {
+        this.setState({
+            ...this.state,
+            route: [],
+            showRoute: false,
+            selectedTripCampgrounds: []
+        })
+    }
+
+    getMyTripVisitsHover = (trip) =>{
+        let campgrounds = []
+        this.state.myVisits.forEach(campground =>{
+            if(campground.trip_id === trip.id){
+                campgrounds.push(
+                        {
+                            "type": "Feature",
+                            "geometry": {
+                            "type": "Point",
+                            "coordinates": [
+                                Number(campground.longitude),
+                                Number(campground.latitude)
+                            ]
+                            },
+                            "properties": {
+                                "stop_number": campground.stop_number,
+                                "trip_id": campground.trip_id,
+                                "id": campground.id,
+                                "name": campground.location_name,
+                                "description": campground.description,
+                                "phone": campground.phone,
+                                "reservable": campground.reservable,
+                                "email": campground.email,
+                                "longitude": Number(campground.longitude),
+                                "latitude": Number(campground.latitude)
+                            }
+                        }
+                )
+            }
+        })
+        this.setState({
+            ...this.state,
+            selectedTripCampgrounds: campgrounds
+        },
+            () => {
+                this.renderMarkers()
+                // setTimeout(() => this.sortTripVisits(), 100)
+            }
+        )
+    }
+
     getMyTripVisits = (trip) =>{
         let campgrounds = []
         this.state.myVisits.forEach(campground =>{
@@ -617,10 +744,14 @@ class Map extends React.Component {
             if(campgroundToRemove.properties.id){
                 if(campground.properties.id !== campgroundToRemove.properties.id){
                     return campground
+                }else{
+                    return null
                 }
             }else{
                 if(campground.properties.name !== campgroundToRemove.properties.name || campground.properties.latitude !== campgroundToRemove.properties.latitude || campground.properties.longitude !== campgroundToRemove.properties.longitude){
                     return campground
+                }else{
+                    return null
                 }
             }
         })
@@ -671,7 +802,7 @@ class Map extends React.Component {
             // myVisits: myVisitsNew
         },
         () =>{
-            setTimeout(() =>this.fetchVisits(), 200)
+            setTimeout(() =>this.fetchVisits(), 1000)
             this.getDirections()
         }
         )
@@ -769,7 +900,7 @@ class Map extends React.Component {
             fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${waypoints}?geometries=geojson&access_token=${ACCESS_TOKEN}`)
             .then(res => res.json())
             .then(route =>{
-                    if(route.routes){
+                    if(route.routes !== []){
                     this.setState({
                         ...this.state,
                         showRoute: true,
@@ -826,7 +957,11 @@ class Map extends React.Component {
                     showRoute: true,
                     selectedTrip: trip
                 },
-                   () => setTimeout(() => this.getMyTripVisits(trip))
+                   () => setTimeout(() => {
+                    this.fetchTrips()
+                    this.fetchVisits()
+                    this.getMyTripVisits(trip)}
+                   , 1000)
                 )
             })
         }
@@ -856,6 +991,108 @@ class Map extends React.Component {
         }
     }
 
+    togglePublicTrip = () =>{
+        this.setState({
+            ...this.state,
+            selectedTrip:{
+                ...this.state.selectedTrip,
+                is_public: !this.state.selectedTrip.is_public
+            }
+        },
+        () => this.updatePublicTripinDb()
+        )
+    }
+
+    updatePublicTripinDb = () =>{
+        let patchData = {is_public: this.state.selectedTrip.is_public}
+        fetch(`http://localhost:3001/trips/${this.state.selectedTrip.id}`,{
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(patchData)
+            })
+            .then(res => res.json())
+            .then(trip =>{
+                console.log(trip)
+            })
+    }
+
+    deleteTrip = () =>{
+        let myTrips = this.state.myTrips.filter(trip =>{
+             return this.state.selectedTrip.id !== trip.id
+        })
+        let publicTrips = this.state.publicTrips.filter(trip =>{
+             return this.state.selectedTrip.id !== trip.id
+        })
+        this.setState({
+            showRoute: false,
+            saveDisabled: true,
+            tripSelected: false,
+            showOnlyTrip: false,
+            selectedTripCampgrounds: [],
+            myTrips: myTrips,
+            publicTrips: publicTrips,
+            showTripDetails: false
+        },
+        () => {
+            this.deleteTripVisits()
+        }
+        )
+    }
+
+    deleteTripVisits = () =>{
+        let visitsToDelete = this.state.myVisits.filter(visit =>{
+            return visit.trip_id === this.state.selectedTrip.id
+        })
+        let visitsToKeep = this.state.myVisits.filter(visit =>{
+            return visit.trip_id !== this.state.selectedTrip.id
+        })
+        visitsToDelete.forEach(visit =>{
+            this.deleteVisit(visit)
+        })
+        this.setState({
+            ...this.state,
+            myVisits: visitsToKeep
+        },
+        () => setTimeout(() =>this.deleteTripInDb(), 3000)
+        )
+    }
+
+    deleteTripInDb = () =>{
+        fetch(`http://localhost:3001/trips/${this.state.selectedTrip.id}`,{
+            method: 'DELETE'
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log(data)
+        })
+    }
+
+    deleteTripVisitsinDb = () =>{
+
+    }
+
+    editAddress = () =>{
+        this.setState({
+            ...this.state,
+            editUser: true
+        })
+    }
+
+    updateUser = (user) =>{
+        this.setState({
+            ...this.state,
+            user: user
+        })
+    }
+
+    closeEditAddressWindow = () =>{
+        this.setState({
+            ...this.state,
+            editUser: false
+        })
+    }
 
     render(){
         
@@ -863,7 +1100,8 @@ class Map extends React.Component {
         return (
             <div id="map-container" onClick={() => this.handleMapClick()}>
                 <div className="nav-bar">
-                    <Navbar handleLogOut={this.props.handleLogOut} changeMode={this.changeMode} mode={this.state.mode}/>
+                    <Navbar handleLogOut={this.props.handleLogOut} changeMode={this.changeMode} mode={this.state.mode}
+                    editAddress={this.editAddress}/>
                 </div>
                 <div className="map-search" >
                     <div className="search-icon"></div>
@@ -883,6 +1121,7 @@ class Map extends React.Component {
                         {...mapStyle}
                         onViewportChange={(viewport) => this.setState({...this.state, viewport: viewport})}>
                         {this.state.user? this.renderHouseMarker() : null}
+                        {this.renderTripMarkers()}
                         {this.renderMarkers()}
                         {this.renderPopup()}
                         {this.state.showRoute ? this.renderRoute() : null}
@@ -890,7 +1129,9 @@ class Map extends React.Component {
                 </div>
                 <div>{this.state.mode === 'browse' ? <BrowseTrips/> : null}</div>
                 <div>{this.state.mode === 'myTrips' && this.state.tripSelected === false ? <MyTrips myTrips={this.state.myTrips} 
-                                                                handleMyTripClick={this.handleMyTripClick}/> : null}</div>
+                                                                handleMyTripClick={this.handleMyTripClick}
+                                                                handleTripEnter={this.handleTripEnter}
+                                                                handleTripLeave={this.handleTripLeave} /> : null}</div>
                 <div>{this.state.mode === 'createNew' ? <CreateTrip submitNewTrip={this.submitNewTrip}/> : null}</div>
                 <div>{this.state.tripSelected === true && (this.state.mode === 'myTrips' || this.state.mode === 'browse') ? <TripEditor selectedTripCampgrounds={this.state.selectedTripCampgrounds}
                                                                     trip={this.state.selectedTrip} 
@@ -905,6 +1146,8 @@ class Map extends React.Component {
                                                                     updateTrip = {this.updateTrip}
                                                                     saveDisabled = {this.state.saveDisabled}
                                                                     showDetail = {this.state.showDetail}
+                                                                    togglePublicTrip={this.togglePublicTrip}
+                                                                    deleteTrip={this.deleteTrip}
                                                                     /> : null}</div>
                 <div>{this.state.showDetail === true ? <CampgroundDetails selectedCampground={this.state.selectedCampground}
                                                                     handleOnMouseEnter={this.handleOnMouseEnter}
@@ -913,6 +1156,10 @@ class Map extends React.Component {
                                                                     weather={this.state.weather}
                                                                     /> : null}</div>
                 <div>{this.state.showTripDetails === true ? <TripDetails selectedTrip={this.state.selectedTrip} closeTripDetailWindow={this.closeTripDetailWindow}/> : null}</div>
+                <div>{this.state.editUser ? <EditAddress updateUser={this.updateUser} 
+                                                        user={this.state.user}
+                                                        closeEditAddressWindow={this.closeEditAddressWindow}
+                                                        /> : null}</div>
             </div>  
         )
     }

@@ -6,7 +6,9 @@ class MyTrips extends React.Component{
     renderTrip = ()=>{
         return this.props.myTrips.map(trip =>{
             return(
-                <div className='trip' onClick={() => this.handleClick(trip)} key={trip.id}>
+                <div className='trip' onClick={() => this.handleClick(trip)}
+                                        onMouseEnter={() => this.handleMouseEnter(trip)}
+                                        onMouseLeave={() => this.handleMouseLeave()} key={trip.id}>
                     <h3>{trip.title}</h3>
                     <p>{trip.description}</p>
                 </div>
@@ -16,6 +18,14 @@ class MyTrips extends React.Component{
 
     handleClick = (trip) =>{
         this.props.handleMyTripClick(trip)
+    }
+
+    handleMouseEnter = (trip) =>{
+        this.props.handleTripEnter(trip)
+    }
+
+    handleMouseLeave = () =>{
+        this.props.handleTripLeave()
     }
 
     render(){

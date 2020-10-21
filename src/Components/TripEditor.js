@@ -2,7 +2,8 @@ import React from 'react';
 
 class TripEditor extends React.Component{
     state={
-        selectedIndex: null
+        selectedIndex: null,
+        showOptionMenu: false
     }
 
 
@@ -65,12 +66,62 @@ class TripEditor extends React.Component{
         
     }
 
+    menuButtonClick = () =>{
+        this.setState({
+            ...this.state,
+            showOptionMenu: !this.state.showOptionMenu
+        })
+    }
+
+    handlePublicClick = () =>{
+        this.props.togglePublicTrip()
+        this.setState({
+            ...this.state,
+            showOptionMenu: false
+        })        
+    }
+
+    handleDeleteTripClick = () =>{
+        this.props.deleteTrip()
+        this.setState({
+            ...this.state,
+            showOptionMenu: false
+        })   
+    }
+
+    renderDropdown = () =>{
+        return(
+            <div className="dropdown">
+                <div id="myDropdown" className="dropdown-content"
+                                    style={{right:'0px', marginRight:'-104px', marginTop:'32px'}}>
+                    <button className='dropdown-button' 
+                            value='makePublic' 
+                            onClick={this.handlePublicClick} 
+                            >{this.props.trip.is_public ? "Set To Private": "Set to Public"}</button>
+                    <button className='dropdown-button' 
+                            value='delete' 
+                            onClick={this.handleDeleteTripClick} 
+                            >Delete</button>
+                </div>
+            </div>
+        )
+    }
+
     render(){
         return(
             <div className="trip-panel">
                 <div className="close-button" onClick={this.handleCloseClick}>x</div>
+                <div className="option-button-container">  
+                    <div className={this.state.showOptionMenu ? "option-change" : "option-button"} onClick={this.menuButtonClick}>
+                        <div className="bar1"></div>
+                        <div className="bar2"></div>
+                        <div className="bar3"></div>
+                    </div>
+                </div>
+                {this.state.showOptionMenu ? this.renderDropdown() : null}
                 <div className="trip-panel-title"> 
                     <h1>{this.props.trip.title}</h1> 
+                    <p>{this.props.trip.is_public ? "Public" : "Private"}</p>
                 </div>
                 <div className="trip-list">
                     {this.renderVisits()}

@@ -7,7 +7,8 @@ import { Link } from 'react-router-dom';
 
 class Navbar extends React.Component{
     state = {
-        dropdownActive:false
+        dropdownActive:false,
+        userDropdownActive: false
     }
 
     handleLogoutClick = () =>{
@@ -49,6 +50,7 @@ class Navbar extends React.Component{
         this.props.changeMode('explore')
     }
 
+    
 
     renderTripDropdown = () =>{
         return(
@@ -71,6 +73,40 @@ class Navbar extends React.Component{
         )
     }
 
+    renderUserDropdown = () =>{
+        return(
+            <div id="myDropdown" className="dropdown-content"
+                                style={{marginLeft:'-48px', marginTop:'20px'}}>
+                <button className='dropdown-button' 
+                        value='editAddress' 
+                        onClick={this.editAddressClick} 
+                        >Edit Home Address</button>
+                <Link to='/login'><button className='dropdown-button' 
+                        value='logout' 
+                        onClick={this.handleLogoutClick} 
+                        >Logout</button></Link>
+            </div>
+        )
+    }
+
+    handleUserDropDownClick = () =>{
+        this.setState({
+            userDropdownActive: !this.state.userDropdownActive
+        },
+         () =>{
+             setTimeout(() =>{
+                this.setState({
+                    userDropdownActive: false
+                })
+             }, 5000)
+         }
+        )
+    }
+
+    editAddressClick = () =>{
+        this.props.editAddress()
+    }
+
     render() {
         return (
             <div className='nav'>
@@ -86,8 +122,12 @@ class Navbar extends React.Component{
                             {this.state.dropdownActive ? this.renderTripDropdown() : null}
                         </div>
                     </div>
-                    <div>
+                    {/* <div>
                         <Link to='/login'><button onClick={this.handleLogoutClick} name="logout">LogOut</button></Link>
+                    </div> */}
+                    <div>
+                        <button onClick={this.handleUserDropDownClick} className="user-button"></button>
+                        {this.state.userDropdownActive ? this.renderUserDropdown() : null}
                     </div>
                 </div>
             </div>

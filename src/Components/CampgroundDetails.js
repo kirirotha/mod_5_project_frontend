@@ -39,6 +39,8 @@ class CampgroundDetails extends React.Component{
                     <p>{this.props.selectedCampground.properties.reservable ? "Yes" : "No"}</p> 
                 </div>
             )
+        }else{
+            return null
         }
     }
     renderForecast = () =>{
@@ -57,6 +59,8 @@ class CampgroundDetails extends React.Component{
                         <h3>{`${Math.floor(daily.temp.max)}\u00B0/${Math.floor(daily.temp.min)}\u00B0`}</h3>
                     </div>
                 )
+            }else{
+                return null
             }
         })
     }
