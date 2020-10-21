@@ -48,7 +48,7 @@ class TripEditor extends React.Component{
                 return(
                     <div key={index}>
                         <div className="visit" key={index} 
-                            // onClick={() => this.handleClick(campground)}
+                            onClick={() => this.handleClick(campground)}
                             onMouseEnter = {() => {this.handleEnter(campground, index)}}
                             onMouseLeave = {() => {this.handleLeave(index)}}
                             >

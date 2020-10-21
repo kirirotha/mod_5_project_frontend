@@ -13,11 +13,13 @@ import MyTrips from './MyTrips';
 import CreateTrip from './CreateTrip';
 import CampgroundDetails from './CampgroundDetails';
 import TripEditor from './TripEditor';
+import TripDetails from './TripDetails';
 
 
 
 const API_KEY = '9f0eb16d-c443-452d-aa8c-be4b8259d21f'
 const ACCESS_TOKEN = 'pk.eyJ1Ijoia2lyaXJvdGhhIiwiYSI6ImNrZnljd3RwZTFscXYyc3M5M21hYnBzd3cifQ.QtkZoBqO03yMwmf8kyL0Ww'
+const WEATHER_API_KEY = '8193c5cae167d371356300b940e3544b'
 
 const mapStyle = {
     width: '100%',
@@ -88,7 +90,10 @@ class Map extends React.Component {
             saveDisabled: true,
             showRoute: false,
             route: {},
-            user: {}
+            user: {},
+            showTripDetails: false,
+            weather: {},
+            initialCampgrounds: []
         }
       }
 
@@ -192,7 +197,8 @@ class Map extends React.Component {
                 console.log(campgrounds)
                 // this.convertToMapObjects(campgrounds)
                 this.setState({
-                    campgroundsRaw: campgrounds.RECDATA
+                    campgroundsRaw: campgrounds.RECDATA,
+                    initialCampgrounds: campgrounds.RECDATA
                 },
                 () => this.convertToMapObjects()
                 )
@@ -209,8 +215,9 @@ class Map extends React.Component {
             .then(campgrounds =>{
                 console.log(campgrounds)
                 // this.convertToMapObjects(campgrounds)
+                let campgroundsRaw = this.state.initialCampgrounds.concat(campgrounds.RECDATA)
                 this.setState({
-                    campgroundsRaw: campgrounds.RECDATA
+                    campgroundsRaw: campgroundsRaw
                 },
                 () => this.convertToMapObjects()
                 )
@@ -289,7 +296,7 @@ class Map extends React.Component {
             showDetail: true,
             selectedCampground: campground
         },
-            () => {this.handleZoom()}
+            () => {this.getWeather()}
         )        
     }
 
@@ -308,6 +315,21 @@ class Map extends React.Component {
                 () => this.fetchCampsites()
             )     
         }   
+    }
+
+    getWeather = () =>{
+        let lat = this.state.selectedCampground.properties.latitude
+        let lon = this.state.selectedCampground.properties.longitude
+        let exclude = 'minutely,hourly'
+        fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=${exclude}&units=imperial&appid=${WEATHER_API_KEY}`)
+        .then(res => res.json())
+        .then(data =>{
+            console.log(data)
+            this.setState({
+                ...this.state,
+                weather: data
+            })
+        })
     }
 
     handleOnMouseEnter = (campground,index) =>{
@@ -447,7 +469,7 @@ class Map extends React.Component {
             showDetail: true,
             selectedCampground: home
         },
-            () => {this.handleZoom()}
+        () => {this.getWeather()}
         )        
     }
 
@@ -834,6 +856,7 @@ class Map extends React.Component {
         }
     }
 
+
     render(){
         
         let viewport = this.state.viewport;
@@ -883,7 +906,13 @@ class Map extends React.Component {
                                                                     saveDisabled = {this.state.saveDisabled}
                                                                     showDetail = {this.state.showDetail}
                                                                     /> : null}</div>
-                <div>{this.state.showDetail === true ? <CampgroundDetails selectedCampground={this.state.selectedCampground} closeDetailWindow={this.closeDetailWindow}/> : null}</div>
+                <div>{this.state.showDetail === true ? <CampgroundDetails selectedCampground={this.state.selectedCampground}
+                                                                    handleOnMouseEnter={this.handleOnMouseEnter}
+                                                                    handleOnMouseLeave={this.handleOnMouseLeave}
+                                                                    closeDetailWindow={this.closeDetailWindow}
+                                                                    weather={this.state.weather}
+                                                                    /> : null}</div>
+                <div>{this.state.showTripDetails === true ? <TripDetails selectedTrip={this.state.selectedTrip} closeTripDetailWindow={this.closeTripDetailWindow}/> : null}</div>
             </div>  
         )
     }

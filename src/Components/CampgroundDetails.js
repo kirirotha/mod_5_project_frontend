@@ -41,10 +41,30 @@ class CampgroundDetails extends React.Component{
             )
         }
     }
+    renderForecast = () =>{
+        let index = 0
+        return this.props.weather.daily.map(daily =>{
+            index++
+            const timestamp = daily.dt;
+            let a = new Date(timestamp*1000);
+            let days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+            let dayOfWeek = days[a.getDay()]
+            if(index > 1){
+                return(
+                    <div className="daily-forecast" key={index}>
+                        <h3>{dayOfWeek}</h3>
+                        <img src={`http://openweathermap.org/img/wn/${daily.weather[0].icon}.png`} alt="current-weather" className="current-weather-icon"/>
+                        <h3>{`${Math.floor(daily.temp.max)}\u00B0/${Math.floor(daily.temp.min)}\u00B0`}</h3>
+                    </div>
+                )
+            }
+        })
+    }
 
     render(){
         return(
-            <div className="detail-panel">
+            <div className="detail-panel" onMouseEnter={() => this.props.handleOnMouseEnter(this.props.selectedCampground)}
+                                            onMouseLeave={() => this.props.handleOnMouseLeave()}>
                 <div className="close-button" onClick={this.handleCloseClick}>x</div>
                 <div className="detail-panel-title"> 
                     <h1>{this.props.selectedCampground.properties.name}</h1> 
@@ -61,6 +81,19 @@ class CampgroundDetails extends React.Component{
                     {this.renderPhone()}
                     {this.renderEmail()}
                     {this.renderReservable()}
+                </div>
+                <div className="weather-box">
+                    <div className="current-weather">
+                        <h2 style={{width: '100px'}}>Current Weather</h2>
+                        {this.props.weather.daily ? <img src={`http://openweathermap.org/img/wn/${this.props.weather.current.weather[0].icon}@2x.png`} alt="current-weather" className="current-weather-icon"/> : null}
+                        {this.props.weather.daily ? <h2 style={{width: '100px'}}>{this.props.weather.current.weather[0].description}</h2> : null}
+                        <div>
+                            {this.props.weather.daily ? <h1>{`${Math.floor(this.props.weather.current.temp)}\u00B0 F`}</h1> : null}
+                        </div>
+                    </div>
+                    <div className="forecast">
+                        {this.props.weather.daily ? this.renderForecast() : null}
+                    </div>
                 </div>
             </div>
         )
