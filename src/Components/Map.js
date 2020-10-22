@@ -15,12 +15,17 @@ import CampgroundDetails from './CampgroundDetails';
 import TripEditor from './TripEditor';
 import TripDetails from './TripDetails';
 import EditAddress from './EditAddress';
+import PublicTripDetail from './PublicTripDetail'
 
 
 
 const API_KEY = '9f0eb16d-c443-452d-aa8c-be4b8259d21f'
 const ACCESS_TOKEN = 'pk.eyJ1Ijoia2lyaXJvdGhhIiwiYSI6ImNrZnljd3RwZTFscXYyc3M5M21hYnBzd3cifQ.QtkZoBqO03yMwmf8kyL0Ww'
 const WEATHER_API_KEY = '8193c5cae167d371356300b940e3544b'
+
+const TERRAIN = "mapbox://styles/kirirotha/ckfycxc4q052819nz3nft7p8e"
+const SATELLITE= "mapbox://styles/mapbox/satellite-v9"
+const RETRO = "mapbox://styles/kirirotha/ckgka6ypb070q19mt0yr1kgwa"
 
 const mapStyle = {
     width: '100%',
@@ -95,7 +100,8 @@ class Map extends React.Component {
             showTripDetails: false,
             weather: {},
             initialCampgrounds: [],
-            editUser: false
+            editUser: false,
+            showPublicTripDetail: false
         }
       }
 
@@ -1003,6 +1009,8 @@ class Map extends React.Component {
         )
     }
 
+    
+
     updatePublicTripinDb = () =>{
         let patchData = {is_public: this.state.selectedTrip.is_public}
         fetch(`http://localhost:3001/trips/${this.state.selectedTrip.id}`,{
@@ -1015,6 +1023,7 @@ class Map extends React.Component {
             .then(res => res.json())
             .then(trip =>{
                 console.log(trip)
+                this.fetchTrips()
             })
     }
 
@@ -1069,10 +1078,7 @@ class Map extends React.Component {
         })
     }
 
-    deleteTripVisitsinDb = () =>{
-
-    }
-
+    
     editAddress = () =>{
         this.setState({
             ...this.state,
@@ -1094,8 +1100,34 @@ class Map extends React.Component {
         })
     }
 
+    handlePublicTripClick = (trip) =>{
+        console.log('click')
+        this.setState({
+            ...this.state,
+            selectedTrip: trip,
+            showPublicTripDetail: true
+        })
+    }
+
+    closePublicTripDetailWindow = () =>{
+        this.setState({
+            ...this.state,
+            showPublicTripDetail: false,
+            showRoute: false,
+            saveDisabled: true,
+            tripSelected: false,
+            showOnlyTrip: false,
+            selectedTripCampgrounds: []
+        })
+    }
+    
+    addTrip = () =>{
+        console.log('adding trip')
+        let newTripList = []
+        newTripList.push(this.home) 
+    }
+
     render(){
-        
         let viewport = this.state.viewport;
         return (
             <div id="map-container" onClick={() => this.handleMapClick()}>
@@ -1116,7 +1148,7 @@ class Map extends React.Component {
                 </div>
                 <div className="map-container">
                     <MapGL mapboxApiAccessToken={ACCESS_TOKEN}
-                        mapStyle="mapbox://styles/kirirotha/ckfycxc4q052819nz3nft7p8e"
+                        mapStyle={RETRO}
                         {...viewport}
                         {...mapStyle}
                         onViewportChange={(viewport) => this.setState({...this.state, viewport: viewport})}>
@@ -1127,7 +1159,11 @@ class Map extends React.Component {
                         {this.state.showRoute ? this.renderRoute() : null}
                     </MapGL>
                 </div>
-                <div>{this.state.mode === 'browse' ? <BrowseTrips/> : null}</div>
+                <div>{this.state.mode === 'browse' && this.state.showPublicTripDetail === false ? <BrowseTrips publicTrips={this.state.publicTrips}
+                                                                handlePublicTripClick={this.handlePublicTripClick}
+                                                                handleTripEnter={this.handleTripEnter}
+                                                                handleTripLeave={this.handleTripLeave}
+                                                                /> : null}</div>
                 <div>{this.state.mode === 'myTrips' && this.state.tripSelected === false ? <MyTrips myTrips={this.state.myTrips} 
                                                                 handleMyTripClick={this.handleMyTripClick}
                                                                 handleTripEnter={this.handleTripEnter}
@@ -1160,6 +1196,11 @@ class Map extends React.Component {
                                                         user={this.state.user}
                                                         closeEditAddressWindow={this.closeEditAddressWindow}
                                                         /> : null}</div>
+                <div>{this.state.showPublicTripDetail && this.state.mode === "browse" ? <PublicTripDetail selectedTripCampgrounds={this.state.selectedTripCampgrounds}
+                                                                    trip={this.state.selectedTrip} handleOnMouseEnter={this.handleOnMouseEnter}
+                                                                    handleOnMouseLeave={this.handleOnMouseHomeLeave} handleCampgroundClick={this.handleCampgroundClick}
+                                                                    closePublicTripDetailWindow={this.closePublicTripDetailWindow} addTrip={this.addTrip}
+                                                                    /> : null}</div>
             </div>  
         )
     }

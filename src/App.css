@@ -670,6 +670,10 @@ a{
   background: #009600;
 }
 
+.toggle-view button:disabled{
+  background: grey;
+}
+
 .weather-box{
 background-color: rgba(0, 0, 0, 0.45);;
  height: 28%;
