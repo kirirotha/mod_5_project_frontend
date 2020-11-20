@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 class Navbar extends React.Component{
     state = {
         dropdownActive:false,
+        dropdown2Active:false,
         userDropdownActive: false
     }
 
@@ -18,29 +19,29 @@ class Navbar extends React.Component{
     handleDropdownClick = () =>{
         this.setState({
             dropdownActive: !this.state.dropdownActive
-        },
-         () =>{
-             setTimeout(() =>{
-                this.setState({
-                    dropdownActive: false
-                })
-             }, 5000)
-         }
+        }
+        )
+    }
+
+    handleDropdown2Click = () =>{
+        this.setState({
+            dropdown2Active: !this.state.dropdown2Active
+        }
         )
     }
 
     handleDropdownItemClick = (e) =>{
         this.setState({
             dropdownActive: false
-        },
-        () =>{
-            setTimeout(() =>{
-               this.setState({
-                   dropdownActive: false
-               })
-            }, 5000)
         })
         this.props.changeMode(e.target.value)
+    }
+
+    handleDropdown2ItemClick = (e) =>{
+        this.setState({
+            dropdown2Active: false
+        })
+        this.props.changeMapMode(e.target.value)
     }
 
     handleExploreClick = () =>{
@@ -68,6 +69,36 @@ class Navbar extends React.Component{
                             value='createNew' 
                             onClick={this.handleDropdownItemClick} 
                             disabled={this.props.mode === 'createNew' ? true : false}>Create New</button>
+                </div>
+            </div>
+        )
+    }
+
+    renderMapDropdown = () =>{
+        return(
+            <div>
+                <div id="myDropdown" className="dropdown-content">
+                    <button className='dropdown-button' 
+                            value='DEFAULT' 
+                            onClick={this.handleDropdown2ItemClick} 
+                            disabled={this.props.mapMode === 'DEFAULT' ? true : false}>Default</button>
+                    <button className='dropdown-button' 
+                            value='SATELLITE' 
+                            onClick={this.handleDropdown2ItemClick} 
+                            disabled={this.props.mapMode === 'SATELLITE' ? true : false}>Satellite</button>
+                    <button className='dropdown-button' 
+                            value='RETRO' 
+                            onClick={this.handleDropdown2ItemClick} 
+                            disabled={this.props.Mode === 'RETRO' ? true : false}>Retro</button>
+                    <button className='dropdown-button' 
+                            value='LIGHT' 
+                            onClick={this.handleDropdown2ItemClick} 
+                            disabled={this.props.mapMode === 'LIGHT' ? true : false}>Light</button>
+                    <button className='dropdown-button' 
+                            value='DARK' 
+                            onClick={this.handleDropdown2ItemClick} 
+                            disabled={this.props.Mode === 'DARK' ? true : false}>Dark</button>
+                    
                 </div>
             </div>
         )
@@ -120,6 +151,12 @@ class Navbar extends React.Component{
                         <div className="dropdown">
                             <button onClick={this.handleDropdownClick} className="dropbtn">{this.state.dropdownActive ? "Trips     \u25B2"  : "Trips      \u25BC"}</button>
                             {this.state.dropdownActive ? this.renderTripDropdown() : null}
+                        </div>
+                    </div>
+                    <div>
+                        <div className="dropdown">
+                            <button onClick={this.handleDropdown2Click} className="dropbtn">{this.state.dropdown2Active ? "Map Options     \u25B2"  : "Map Options      \u25BC"}</button>
+                            {this.state.dropdown2Active ? this.renderMapDropdown() : null}
                         </div>
                     </div>
                     {/* <div>

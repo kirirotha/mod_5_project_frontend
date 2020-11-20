@@ -54,7 +54,7 @@ class PublicTripDetail extends React.Component{
     render(){
         return(
             <div className="trip-panel">
-                {this.state.showOptionMenu ? this.renderDropdown() : null}
+                <div className="close-button" onClick={this.handleCloseClick}>x</div>
                 <div className="trip-panel-title"> 
                     <h1>{this.props.trip.title}</h1> 
                     <p>{this.props.trip.is_public ? "Public" : "Private"}</p>

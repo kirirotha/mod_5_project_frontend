@@ -23,9 +23,11 @@ const API_KEY = '9f0eb16d-c443-452d-aa8c-be4b8259d21f'
 const ACCESS_TOKEN = 'pk.eyJ1Ijoia2lyaXJvdGhhIiwiYSI6ImNrZnljd3RwZTFscXYyc3M5M21hYnBzd3cifQ.QtkZoBqO03yMwmf8kyL0Ww'
 const WEATHER_API_KEY = '8193c5cae167d371356300b940e3544b'
 
-const TERRAIN = "mapbox://styles/kirirotha/ckfycxc4q052819nz3nft7p8e"
+const DEFAULT = "mapbox://styles/kirirotha/ckfycxc4q052819nz3nft7p8e"
 const SATELLITE= "mapbox://styles/mapbox/satellite-v9"
 const RETRO = "mapbox://styles/kirirotha/ckgka6ypb070q19mt0yr1kgwa"
+const LIGHT = "mapbox://styles/mapbox/light-v10"
+const DARK = "mapbox://styles/mapbox/dark-v10"
 
 const mapStyle = {
     width: '100%',
@@ -101,7 +103,8 @@ class Map extends React.Component {
             weather: {},
             initialCampgrounds: [],
             editUser: false,
-            showPublicTripDetail: false
+            showPublicTripDetail: false,
+            mapMode: "DEFAULT"
         }
       }
 
@@ -186,7 +189,7 @@ class Map extends React.Component {
         })
         this.setState({
             ...this.state,
-            myVisits: myVisits
+            myVisits: visits
         })
     }
 
@@ -966,7 +969,8 @@ class Map extends React.Component {
                    () => setTimeout(() => {
                     this.fetchTrips()
                     this.fetchVisits()
-                    this.getMyTripVisits(trip)}
+                    // this.getMyTripVisits(trip)
+                    }
                    , 1000)
                 )
             })
@@ -1120,11 +1124,100 @@ class Map extends React.Component {
             selectedTripCampgrounds: []
         })
     }
+
+    createAddedTrip = () =>{
+        const newTrip = {
+            title: this.state.selectedTrip.title,
+            description: this.state.selectedTrip.description,
+            user_id: this.state.user.id,
+            is_public: false
+        }
+        fetch('http://localhost:3001/trips',{
+        method: 'POST',
+        headers: {'Content-type': 'application/json'},
+        body: JSON.stringify(newTrip)
+        })
+        .then(res => res.json())
+        .then(trip =>{
+            // this.props.submitNewTrip(trip)
+            this.addTrip(trip)
+        })
+    }
     
-    addTrip = () =>{
+    addTrip = (trip) =>{
         console.log('adding trip')
+        let home ={
+            "type": "Feature",
+            "geometry": {
+            "type": "Point",
+            "coordinates": [
+                Number(this.state.user.home_longitude),
+                Number(this.state.user.home_latitude)
+            ]},
+            properties: {description: `${this.state.user.street} <br> ${this.state.user.city}, ${this.state.user.state} ${this.state.user.zip}`,
+                latitude: Number(this.state.user.home_latitude),
+                longitude: Number(this.state.user.home_longitude),
+                name: "Home" }}
         let newTripList = []
-        newTripList.push(this.home) 
+        newTripList.push(home)
+        this.state.selectedTripCampgrounds.forEach(visit =>{
+            newTripList.push(visit)
+        }) 
+        newTripList.push(home)
+        let index = 0
+        let newCampgrounds = []
+        newTripList.forEach(visit =>{
+            index++
+            const newData = {
+                properties:{
+                    stop_number: index,
+                    trip_id: trip.id,
+                    name: visit.properties.name,
+                    latitude: visit.properties.latitude,
+                    longitude: visit.properties.longitude,
+                    description: visit.properties.description,
+                    phone: visit.properties.phone,
+                    email: visit.properties.email,
+                    reservable: visit.properties.reservable,
+                    date_visited: null
+                }
+            }
+            this.createVisit(newData, index)
+            newCampgrounds.push(newData)
+        })
+        this.setState({
+            ...this.state,
+            selectedTrip: trip,
+            selectedTripCampgrounds: newCampgrounds,
+            // mode: "myTrips",
+            // showPublicTripDetail: false
+        },
+        () => {this.getDirections()}
+        )
+    }
+
+    changeMapMode = (newMode) =>{
+        this.setState({
+            ...this.state,
+            mapMode: newMode
+        })
+    }
+
+   
+    setMapMode = () =>{
+        if(this.state.mapMode === "DEFAULT"){
+            return DEFAULT
+        }else if(this.state.mapMode === "SATELLITE"){
+            return SATELLITE
+        }else if(this.state.mapMode === "RETRO"){
+            return RETRO
+        }else if(this.state.mapMode === "LIGHT"){
+            return LIGHT
+        }else if(this.state.mapMode === "DARK"){
+            return DARK
+        }else{
+            return null
+        }
     }
 
     render(){
@@ -1133,7 +1226,7 @@ class Map extends React.Component {
             <div id="map-container" onClick={() => this.handleMapClick()}>
                 <div className="nav-bar">
                     <Navbar handleLogOut={this.props.handleLogOut} changeMode={this.changeMode} mode={this.state.mode}
-                    editAddress={this.editAddress}/>
+                    editAddress={this.editAddress} changeMapMode={this.changeMapMode} mapMode={this.state.mapMode}/>
                 </div>
                 <div className="map-search" >
                     <div className="search-icon"></div>
@@ -1148,7 +1241,7 @@ class Map extends React.Component {
                 </div>
                 <div className="map-container">
                     <MapGL mapboxApiAccessToken={ACCESS_TOKEN}
-                        mapStyle={RETRO}
+                        mapStyle={this.setMapMode()}
                         {...viewport}
                         {...mapStyle}
                         onViewportChange={(viewport) => this.setState({...this.state, viewport: viewport})}>
@@ -1199,7 +1292,7 @@ class Map extends React.Component {
                 <div>{this.state.showPublicTripDetail && this.state.mode === "browse" ? <PublicTripDetail selectedTripCampgrounds={this.state.selectedTripCampgrounds}
                                                                     trip={this.state.selectedTrip} handleOnMouseEnter={this.handleOnMouseEnter}
                                                                     handleOnMouseLeave={this.handleOnMouseHomeLeave} handleCampgroundClick={this.handleCampgroundClick}
-                                                                    closePublicTripDetailWindow={this.closePublicTripDetailWindow} addTrip={this.addTrip}
+                                                                    closePublicTripDetailWindow={this.closePublicTripDetailWindow} addTrip={this.createAddedTrip}
                                                                     /> : null}</div>
             </div>  
         )
